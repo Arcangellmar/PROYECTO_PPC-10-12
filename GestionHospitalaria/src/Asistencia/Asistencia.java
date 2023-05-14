@@ -1,21 +1,13 @@
 package Asistencia;
 
-import Conexion.TestDBConnectionPool;
+import Conexion.ConnectionPool;
 import InicioSesion.inicioAdministrativo;
-import com.mysql.jdbc.PreparedStatement;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseEvent;
 import java.sql.*;
-import javax.swing.JOptionPane;
-import javax.swing.RowFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
 
 public class Asistencia extends javax.swing.JFrame {
 
-    //Conexion conE = new Conexion();
-    TestDBConnectionPool conE = new TestDBConnectionPool();
     Connection conetE;
     DefaultTableModel modelo;
     Statement st;
@@ -23,51 +15,51 @@ public class Asistencia extends javax.swing.JFrame {
     int idE;
     private TableRowSorter trsfiltro;
     String filtro;
-    
+
     public Asistencia() {
         initComponents();
         setLocationRelativeTo(null);
         mostrarAsistencias();
     }
-    
-    public void mostrarAsistencias(){
-        
-        String sql = "SELECT personal.nombres, personal.apellido_paterno, personal.apellido_materno, medico.id_dni_personal,\n" +
-                     "especialidad.nombre_especialidad, turno.descripcion, ,medico.hora_entrada, lector_asistencia.hora, timediff(lector_asistencia.hora, hora_entrada)FROM medico\n" +
-                     "INNER JOIN lector_asistencia ON lector_asistencia.dni_medico = medico.codigo_medico\n" +
-                     "INNER JOIN personal ON personal.id_dni = medico.id_dni_personal\n" +
-                     "INNER JOIN especialidad ON medico.codigo_especialidad = especialidad.codigo_especialidad\n" +
-                     "INNER JOIN turno ON personal.turno = turno.codigo_turno\n"
-                     +"GROUP BY id_dni_personal";
-    
-        try{
-            conetE = conE.test();
+
+    public void mostrarAsistencias() {
+
+        String sql = "SELECT personal.nombres, personal.apellido_paterno, personal.apellido_materno, medico.id_dni_personal,\n"
+                + "especialidad.nombre_especialidad, turno.descripcion, ,medico.hora_entrada, lector_asistencia.hora, timediff(lector_asistencia.hora, hora_entrada)FROM medico\n"
+                + "INNER JOIN lector_asistencia ON lector_asistencia.dni_medico = medico.codigo_medico\n"
+                + "INNER JOIN personal ON personal.id_dni = medico.id_dni_personal\n"
+                + "INNER JOIN especialidad ON medico.codigo_especialidad = especialidad.codigo_especialidad\n"
+                + "INNER JOIN turno ON personal.turno = turno.codigo_turno\n"
+                + "GROUP BY id_dni_personal";
+
+        try {
+            conetE = ConnectionPool.getInstance().getConnection();
             st = conetE.createStatement();
             rs = st.executeQuery(sql);
             Object[] datosAsistencia = new Object[9];
             modelo = (DefaultTableModel) susAsistenciasTable_Asistencia.getModel();
-            
-            while(rs.next()){
-                datosAsistencia [0] = rs.getString("nombres");
-                datosAsistencia [1] = rs.getString("apellido_paterno");
-                datosAsistencia [2] = rs.getString("apellido_materno");
-                datosAsistencia [3] = rs.getInt("id_dni_personal");
-                datosAsistencia [4] = rs.getString("nombre_especialidad");
-                datosAsistencia [5] = rs.getString("descripcion");
-                datosAsistencia [6] = rs.getTime("hora_entrada");
-                datosAsistencia [7] = rs.getTime("hora");
-                datosAsistencia [8] = rs.getTime("timediff(lector_asistencia.hora, hora_entrada)");
-                
+
+            while (rs.next()) {
+                datosAsistencia[0] = rs.getString("nombres");
+                datosAsistencia[1] = rs.getString("apellido_paterno");
+                datosAsistencia[2] = rs.getString("apellido_materno");
+                datosAsistencia[3] = rs.getInt("id_dni_personal");
+                datosAsistencia[4] = rs.getString("nombre_especialidad");
+                datosAsistencia[5] = rs.getString("descripcion");
+                datosAsistencia[6] = rs.getTime("hora_entrada");
+                datosAsistencia[7] = rs.getTime("hora");
+                datosAsistencia[8] = rs.getTime("timediff(lector_asistencia.hora, hora_entrada)");
+
                 modelo.addRow(datosAsistencia);
             }
             susAsistenciasTable_Asistencia.setModel(modelo);
-        }catch(Exception e){
-            
+        } catch (SQLException e) {
+            System.out.println("Error en conexion db");
         }
-    
+
     }
 
-    public void buscarAsistencias(String buscar){
+    public void buscarAsistencias(String buscar) {
         susAsistenciasTable_Asistencia.setModel(modelo);
     }
 
@@ -215,12 +207,12 @@ public class Asistencia extends javax.swing.JFrame {
     private void botonRegresar_AsistenciaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonRegresar_AsistenciaActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_botonRegresar_AsistenciaActionPerformed
-    public void buscar(String buscar){
+    public void buscar(String buscar) {
         BuscarAsistencia p = new BuscarAsistencia();
-        
+
         DefaultTableModel modelo = p.buscarAsistencias(buscar);
         susAsistenciasTable_Asistencia.setModel(modelo);
-    }   
+    }
     private void botonBuscarPanel_AsistenciaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonBuscarPanel_AsistenciaActionPerformed
         // TODO add your handling code here:
         buscar(dniBuscadorTxtField_Asistencia.getText());

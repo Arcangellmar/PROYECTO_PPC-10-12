@@ -1,26 +1,15 @@
 package Horarios;
 
-import Horarios.Principal;
-import Asistencia.*;
-import Conexion.TestDBConnectionPool;
-import InicioSesion.inicioAdministrativo;
+import Conexion.ConnectionPool;
 import InicioSesion.inicioMedico;
-import com.mysql.jdbc.PreparedStatement;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseEvent;
-import static java.lang.constant.ConstantDescs.NULL;
 import java.sql.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JOptionPane;
-import javax.swing.RowFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
 
 public class Horario extends javax.swing.JFrame {
 
-    TestDBConnectionPool conE = new TestDBConnectionPool();
     Connection conetE;
     DefaultTableModel modelo;
     Statement st;
@@ -28,20 +17,20 @@ public class Horario extends javax.swing.JFrame {
     int idE;
     private TableRowSorter trsfiltro;
     String filtro;
-    
-    public Horario(){
+
+    public Horario() {
         initComponents();
         setLocationRelativeTo(null);
         mensajeFaltanCampos_Label.setVisible(false);
         mostrarHorarios();
     }
-    
-    public void contarPacientes(){
-        String contarsql = "SELECT count(DISTINCT dni_paciente) FROM citas WHERE citas.dni_medico = "+Integer.parseInt(dniMedicoTxtField_Horario.getText());
-        System.out.println("contarsql es: "+contarsql);
+
+    public void contarPacientes() throws SQLException {
+        String contarsql = "SELECT count(DISTINCT dni_paciente) FROM citas WHERE citas.dni_medico = " + Integer.parseInt(dniMedicoTxtField_Horario.getText());
+        System.out.println("contarsql es: " + contarsql);
         int contador = 0;
-        System.out.println("valor de contador es: "+contador);
-        conetE = conE.test();
+        System.out.println("valor de contador es: " + contador);
+        conetE = ConnectionPool.getInstance().getConnection();
         try {
             st = conetE.createStatement();
         } catch (SQLException ex) {
@@ -52,53 +41,53 @@ public class Horario extends javax.swing.JFrame {
         } catch (SQLException ex) {
             Logger.getLogger(Horario.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
         try {
-            while(rs.next()){
+            while (rs.next()) {
                 contador = contador + 1;
             }
-            System.out.println("contador ahora es: "+contador);
+            System.out.println("contador ahora es: " + contador);
         } catch (SQLException ex) {
             Logger.getLogger(Horario.class.getName()).log(Level.SEVERE, null, ex);
         }
         totalPacientesTxtField_Horario.setText(Integer.toString(contador));
         totalPacientesTxtField_Horario.setEditable(false);
     }
-    
-    public void mostrarHorarios(){
-        
+
+    public void mostrarHorarios() {
+
         String sql = "SELECT citas.codigo_cita, citas.dni_paciente, paciente.apellido_paterno,\n"
                 + "paciente.apellido_materno, paciente.eps, citas.fecha, citas.turno, citas.nro_orden\n"
                 + "FROM citas INNER JOIN paciente ON paciente.id_dni = citas.dni_paciente\n"
                 + "ORDER BY codigo_cita";
-    
-        try{
-            conetE = conE.test();
+
+        try {
+            conetE = ConnectionPool.getInstance().getConnection();
             st = conetE.createStatement();
             rs = st.executeQuery(sql);
             Object[] datosHorario = new Object[9];
             modelo = (DefaultTableModel) horariosTable_Horario.getModel();
-            
-            while(rs.next()){
-                datosHorario [0] = rs.getString("codigo_cita");
-                datosHorario [1] = rs.getString("dni_paciente");
-                datosHorario [2] = rs.getString("apellido_paterno");
-                datosHorario [3] = rs.getString("apellido_materno");
-                datosHorario [4] = rs.getString("eps");
-                datosHorario [5] = rs.getDate("fecha");
-                datosHorario [6] = rs.getTime("fecha");
-                datosHorario [7] = rs.getInt("turno");
-                datosHorario [8] = rs.getInt("nro_orden");
-                
+
+            while (rs.next()) {
+                datosHorario[0] = rs.getString("codigo_cita");
+                datosHorario[1] = rs.getString("dni_paciente");
+                datosHorario[2] = rs.getString("apellido_paterno");
+                datosHorario[3] = rs.getString("apellido_materno");
+                datosHorario[4] = rs.getString("eps");
+                datosHorario[5] = rs.getDate("fecha");
+                datosHorario[6] = rs.getTime("fecha");
+                datosHorario[7] = rs.getInt("turno");
+                datosHorario[8] = rs.getInt("nro_orden");
+
                 modelo.addRow(datosHorario);
             }
             horariosTable_Horario.setModel(modelo);
-        }catch(Exception e){
-            
-        }  
+        } catch (SQLException e) {
+
+        }
     }
 
-    public void buscarHorarios(String buscar){
+    public void buscarHorarios(String buscar) {
         horariosTable_Horario.setModel(modelo);
     }
 
@@ -375,12 +364,12 @@ public class Horario extends javax.swing.JFrame {
     private void botonRegresar_AsistenciaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonRegresar_AsistenciaActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_botonRegresar_AsistenciaActionPerformed
-    public void buscar(String buscar1, Date buscar2, String buscar3){
+    public void buscar(String buscar1, Date buscar2, String buscar3) {
         BuscarHorario p = new BuscarHorario();
-        
-        DefaultTableModel modelo = p.buscarHorarios(buscar1,buscar2,buscar3);
+
+        DefaultTableModel modelo = p.buscarHorarios(buscar1, buscar2, buscar3);
         horariosTable_Horario.setModel(modelo);
-    }   
+    }
     private void botonRegresar_AsistenciaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_botonRegresar_AsistenciaMouseClicked
         this.dispose();
         new inicioMedico().setVisible(true);
@@ -400,23 +389,21 @@ public class Horario extends javax.swing.JFrame {
 
     private void botonBuscarPanel_HorarioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonBuscarPanel_HorarioActionPerformed
         int vacio = 0;
-        try{
+        try {
             Date fechaChooser = new Date(jDateChooserFecha_Horario.getDate().getTime());
-            if(turnoTxtField_Horario.getText().isEmpty()||dniMedicoTxtField_Horario.getText().isEmpty()){
+            if (turnoTxtField_Horario.getText().isEmpty() || dniMedicoTxtField_Horario.getText().isEmpty()) {
                 vacio = 1;
                 mensajeFaltanCampos_Label.setVisible(true);
-            }
-            else{
+            } else {
                 vacio = 0;
                 mensajeFaltanCampos_Label.setVisible(false);
-                buscar(dniMedicoTxtField_Horario.getText(),fechaChooser,turnoTxtField_Horario.getText());
+                buscar(dniMedicoTxtField_Horario.getText(), fechaChooser, turnoTxtField_Horario.getText());
                 contarPacientes();
-                Principal pr = new Principal();
-                pr.main(null);
-            }       
-        } catch (NullPointerException e){
+                Principal.main(null);
+            }
+        } catch (NullPointerException e) {
             mensajeFaltanCampos_Label.setVisible(true);
-        } catch (InterruptedException ex) {
+        } catch (InterruptedException | SQLException ex) {
             Logger.getLogger(Horario.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_botonBuscarPanel_HorarioActionPerformed

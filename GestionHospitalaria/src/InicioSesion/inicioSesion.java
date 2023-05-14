@@ -3,18 +3,16 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package InicioSesion;
+
 import Conexion.ConnectionPool;
-import Conexion.TestDBConnectionPool;
-import java.sql.DriverManager;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.awt.event.MouseEvent;
 //import com.mysql.jdbc.PreparedStatement;
 import java.sql.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
-import proyectoppc.Home;
+
 /**
  *
  * @author Lisett
@@ -27,11 +25,12 @@ public class inicioSesion extends javax.swing.JFrame {
     public inicioSesion() {
         initComponents();
     }
+
     public void ingresar() throws SQLException {
-        Connection con1 = new TestDBConnectionPool().test();
+        Connection con1 = ConnectionPool.getInstance().getConnection();
         //Connection con1 = new Conexion().Conectar();
         //Connection con1 = new ConnectionPool().Conectar();
-        PreparedStatement pst = null, rol1=null;
+        PreparedStatement pst = null;
         ResultSet rs = null;
         String User = userTxtf.getText();
         String Pass = contraTxt.getText();
@@ -46,27 +45,27 @@ public class inicioSesion extends javax.swing.JFrame {
                         + "INNER JOIN rol ON rol.id_rol=usuario_rol.id_rol where usuario.usuario='" + User
                         + "' and usuario.contrasenia ='" + Pass + "'");
                 rs = pst.executeQuery();
-                
+
                 if (rs.next()) {
-                    
+
                     String u = rs.getString("usuario.usuario");
                     String p = rs.getString("usuario.contrasenia");
                     String rol = rs.getString("rol.nombre_rol");
-                    if(rol.equals("Recepcionista")){
+                    if (rol.equals("Recepcionista")) {
                         this.dispose();
                         new inicioRecepcionista().setVisible(true);
-                    }else{
-                        if(rol.equals("Medico")){
+                    } else {
+                        if (rol.equals("Medico")) {
                             this.dispose();
                             new inicioMedico().setVisible(true);
-                        }else{
+                        } else {
                             this.dispose();
                             new inicioAdministrativo().setVisible(true);
                         }
                     }
-                    
+
                 } else {
-                    
+
                     JOptionPane.showMessageDialog(this, "Credenciales incorrectas. Vuelve a intentar de nuevo.");
                 }
             } catch (SQLException e) {
@@ -74,19 +73,19 @@ public class inicioSesion extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(this, "Ocurrio un error inesperado.\nFavor comunicarse con el administrador.");
             }
         }
-    }                                     
-
-    private void userTxtfKeyTyped(java.awt.event.KeyEvent evt) {                                  
-        if(userTxtf.getText().length() == 50){
-            evt.consume();
-    }                                 
     }
-    private void contraTxtKeyTyped(java.awt.event.KeyEvent evt) {                                   
-        if(contraTxt.getText().length() == 50){
+
+    private void userTxtfKeyTyped(java.awt.event.KeyEvent evt) {
+        if (userTxtf.getText().length() == 50) {
             evt.consume();
         }
     }
 
+    private void contraTxtKeyTyped(java.awt.event.KeyEvent evt) {
+        if (contraTxt.getText().length() == 50) {
+            evt.consume();
+        }
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -147,7 +146,7 @@ public class inicioSesion extends javax.swing.JFrame {
 
         logBtnTxt.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         logBtnTxt.setText("INGRESAR");
-        logBtnTxt.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        logBtnTxt.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         logBtnTxt.setPreferredSize(new java.awt.Dimension(137, 16));
         logBtnTxt.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {

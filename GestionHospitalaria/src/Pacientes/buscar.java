@@ -5,26 +5,18 @@
  */
 package Pacientes;
 
-import Conexion.TestDBConnectionPool;
-import com.mysql.jdbc.Blob;
-import com.mysql.jdbc.PreparedStatement;
-import java.io.IOException;
+import Conexion.ConnectionPool;
 import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
-import personal.personal;
 
 /**
  *
  * @author DELL
  */
 public class buscar {
-    TestDBConnectionPool cn = new TestDBConnectionPool();
+
     Connection cnE;
     DefaultTableModel modeloE;
     Statement ste;
@@ -59,35 +51,36 @@ public class buscar {
 //            }
 //        return uno;
 //    }
-    public DefaultTableModel buscar(String dni){
-         String [] nombreColumna = {"dni", "apellido_paterno", "apellido_materno", "nombres", "eps", "fecha_nacimiento", "sexo","telefono"};
-        Object [] especialistasSearch = new Object[8];
+
+    public DefaultTableModel buscar(String dni) {
+        String[] nombreColumna = {"dni", "apellido_paterno", "apellido_materno", "nombres", "eps", "fecha_nacimiento", "sexo", "telefono"};
+        Object[] especialistasSearch = new Object[8];
         DefaultTableModel modelo = new DefaultTableModel(null, nombreColumna);
-        
-        String sql ="SELECT * FROM paciente WHERE id_dni="+dni;
-        
-        try{
-            cnE = cn.test();
+
+        String sql = "SELECT * FROM paciente WHERE id_dni=" + dni;
+
+        try {
+            cnE = ConnectionPool.getInstance().getConnection();
             ste = cnE.createStatement();
             rse = ste.executeQuery(sql);
-            
-            while(rse.next()){
-                  especialistasSearch [0] = rse.getString("id_dni");
-                especialistasSearch [1] = rse.getString("apellido_paterno");
-                especialistasSearch [2] = rse.getString("apellido_materno");
-                especialistasSearch [3] = rse.getString("nombres");
-                especialistasSearch [4] = rse.getString("eps");
-                especialistasSearch [5] = rse.getString("fecha_nacimiento");
-                especialistasSearch [6] = rse.getString("genero");
-                especialistasSearch [7] = rse.getInt("telefono");
-                
+
+            while (rse.next()) {
+                especialistasSearch[0] = rse.getString("id_dni");
+                especialistasSearch[1] = rse.getString("apellido_paterno");
+                especialistasSearch[2] = rse.getString("apellido_materno");
+                especialistasSearch[3] = rse.getString("nombres");
+                especialistasSearch[4] = rse.getString("eps");
+                especialistasSearch[5] = rse.getString("fecha_nacimiento");
+                especialistasSearch[6] = rse.getString("genero");
+                especialistasSearch[7] = rse.getInt("telefono");
+
                 modelo.addRow(especialistasSearch);
             }
-        }catch(Exception e){
+        } catch (Exception e) {
             System.out.println(e);
         }
-        
+
         return modelo;
-    
+
     }
 }

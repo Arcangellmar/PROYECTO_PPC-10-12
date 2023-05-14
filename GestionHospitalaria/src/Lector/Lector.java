@@ -1,9 +1,6 @@
 package Lector;
 
-import Conexion.TestDBConnectionPool;
-//import com.mysql.jdbc.DriverManager;
-//import com.mysql.jdbc.Connection;
-//import com.mysql.jdbc.PreparedStatement;
+import Conexion.ConnectionPool;
 import java.sql.Connection;
 import java.sql.CallableStatement;
 import java.sql.SQLException;
@@ -18,39 +15,38 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import proyectoppc.Home;
 
-public class Lector extends javax.swing.JFrame implements Runnable{    
-    TestDBConnectionPool conE = new TestDBConnectionPool();
-    TestDBConnectionPool conE2 = new TestDBConnectionPool();
-    TestDBConnectionPool consE = new TestDBConnectionPool();
+public class Lector extends javax.swing.JFrame implements Runnable {
+
     Connection conetE, conetE2;
     Connection conetsE;
     Statement st, st2;
-    ResultSet rs, rs2;  
+    ResultSet rs, rs2;
     int dniIngreso;
     String fechaAhora;
     String horaMinutosAhora;
     boolean exist = false;
-    
+
     // Dato.java
     public class Datos {
+
         private boolean disponible;
         private int datos;
         private String valorNombre, valorApePat, valorApeMat, valorTurno, valorhoraMinutosAhora, valoridDni;
 
-        public Datos(){
+        public Datos() {
             datos = 0;
-            disponible = false; 
+            disponible = false;
         }
 
-        public synchronized void Asignar(String nombre, String apePat, String apeMat, String turno, String horaMinutosAhora, String idDni){
-            if(disponible==true){
-                try{
+        public synchronized void Asignar(String nombre, String apePat, String apeMat, String turno, String horaMinutosAhora, String idDni) {
+            if (disponible == true) {
+                try {
                     wait();
-                }catch(Exception e) {
+                } catch (Exception e) {
 
                 }
             }
-            
+
             valorNombre = nombre;
             valorApePat = apePat;
             valorApeMat = apeMat;
@@ -58,133 +54,132 @@ public class Lector extends javax.swing.JFrame implements Runnable{
             valorhoraMinutosAhora = horaMinutosAhora;
             valoridDni = idDni;
             datos = Integer.parseInt(idDni);
-            
-            System.out.println("Escribiendo Nombre: "+valorNombre);
-            System.out.println("Escribiendo ApellidoPaterno: "+valorApePat);
-            System.out.println("Escribiendo ApellidoMaterno: "+valorApeMat);
-            System.out.println("Escribiendo Turno: "+valorTurno);
-            System.out.println("Escribiendo HoraMinutosAhora: "+valorhoraMinutosAhora);
-            System.out.println("Escribiendo DNI: "+valoridDni);
-            
-            disponible=true;
+
+            System.out.println("Escribiendo Nombre: " + valorNombre);
+            System.out.println("Escribiendo ApellidoPaterno: " + valorApePat);
+            System.out.println("Escribiendo ApellidoMaterno: " + valorApeMat);
+            System.out.println("Escribiendo Turno: " + valorTurno);
+            System.out.println("Escribiendo HoraMinutosAhora: " + valorhoraMinutosAhora);
+            System.out.println("Escribiendo DNI: " + valoridDni);
+
+            disponible = true;
             notify();
         }
 
-        public synchronized int Obtener(){   
-            if(disponible==false){
-                try{
+        public synchronized int Obtener() {
+            if (disponible == false) {
+                try {
                     wait();
-                }catch(Exception e){
+                } catch (InterruptedException e) {
 
                 }
             }
-          
-            System.out.println("Se leyo el DNI: "+datos);
-            disponible=false;
-            notify();              
-            return datos; 
+
+            System.out.println("Se leyo el DNI: " + datos);
+            disponible = false;
+            notify();
+            return datos;
         }
     }
-    
+
     // HiloLector.java
-    public class HiloLector extends Thread{
+    public class HiloLector extends Thread {
+
         private Datos ingreso;
 
-        public HiloLector (Datos ingreso){
+        public HiloLector(Datos ingreso) {
             this.ingreso = ingreso;
         }
 
         @Override
-        public void run(){    
+        public void run() {
             int datos;
-            try{
-                for(int i=1;i<=2;i++){
-                    Thread.sleep((int)(Math.random()*1000));
-                    datos =ingreso.Obtener();
+            try {
+                for (int i = 1; i <= 2; i++) {
+                    Thread.sleep((int) (Math.random() * 1000));
+                    datos = ingreso.Obtener();
                 }
-            }catch (InterruptedException ex){            
+            } catch (InterruptedException ex) {
                 Logger.getLogger(HiloLector.class.getName()).log(Level.SEVERE, null, ex);
-            }            
-        } 
+            }
+        }
     }
-    
+
     // HiloEscritor.java
-    public class HiloEscritor extends Thread{
+    public class HiloEscritor extends Thread {
+
         private Datos datos;
         private String HEnombre, HEapePat, HEapeMat, HEturno, HEhoraMinutosAhora, HEidDni;
-        
+
         public HiloEscritor(Datos datos) {
             this.datos = datos;
         }
 
         @Override
-        public void run(){   
-            for(int i=1;i<2;i++){
+        public void run() {
+            for (int i = 1; i < 2; i++) {
                 // String mostrarDatos_sql = "SELECT personal.nombres, personal.apellido_paterno, personal.apellido_materno,"
-                  //       + "personal.turno, personal.id_dni FROM personal WHERE personal.id_dni = "+dniIngreso+"";
-                
-                try{
-                    Thread.sleep((int)(Math.random()*1000));
-                    conetsE = consE.test();
+                //       + "personal.turno, personal.id_dni FROM personal WHERE personal.id_dni = "+dniIngreso+"";
+
+                try {
+                    Thread.sleep((int) (Math.random() * 1000));
+                    conetsE = ConnectionPool.getInstance().getConnection();
                     st = conetsE.createStatement();
                     //rs = st.executeQuery(mostrarDatos_sql);
                     CallableStatement cStmt = conetsE.prepareCall("{call SP_PERSONAL_BUSCAR_DNI (?)}");
                     cStmt.setInt(1, dniIngreso);
                     cStmt.execute();
                     final ResultSet rs = cStmt.getResultSet();
-                    
+
                     fechaAhora = LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
                     String nuevohrs;
                     String nuevomnts;
-                    
+
                     int hrs = LocalDateTime.now().getHour();
-                    if(hrs<10){
-                        nuevohrs = "0"+hrs;
-                    }
-                    else{
+                    if (hrs < 10) {
+                        nuevohrs = "0" + hrs;
+                    } else {
                         nuevohrs = Integer.toString(hrs);
                     }
-                    System.out.println("Nuevohrs: "+nuevohrs);
-                    
+                    System.out.println("Nuevohrs: " + nuevohrs);
+
                     int mnts = LocalDateTime.now().getMinute();
-                    if(mnts<10){
-                        nuevomnts = "0"+mnts;
-                    }
-                    else{
+                    if (mnts < 10) {
+                        nuevomnts = "0" + mnts;
+                    } else {
                         nuevomnts = Integer.toString(mnts);
                     }
-                    System.out.println("Nuevomnts: "+nuevomnts);
-                    
-                    horaMinutosAhora = nuevohrs+":"+nuevomnts;
-                    
-                    if(rs.next()){
+                    System.out.println("Nuevomnts: " + nuevomnts);
+
+                    horaMinutosAhora = nuevohrs + ":" + nuevomnts;
+
+                    if (rs.next()) {
                         exist = true;
-                        
+
                         mensajeNoHayDNI_Label.setVisible(false);
-                        
+
                         nombresTxtField_Lector.setText(rs.getString("nombres"));
                         HEnombre = rs.getString("nombres");
-                        
+
                         apePaternoTxtField_Lector.setText(rs.getString("apellido_paterno"));
                         HEapePat = rs.getString("apellido_paterno");
-                        
+
                         apeMaternoTxtField_Lector.setText(rs.getString("apellido_materno"));
                         HEapeMat = rs.getString("apellido_materno");
-                        
+
                         turnoTxtField_Lector.setText(rs.getString("turno"));
                         HEturno = rs.getString("turno");
-                        
+
                         horaActualTxtField_Lector.setText(horaMinutosAhora);
                         HEhoraMinutosAhora = horaMinutosAhora;
-                        
+
                         dniTxtField_Lector.setText(rs.getString("id_dni"));
                         HEidDni = rs.getString("id_dni");
-                        
+
                         datos.Asignar(HEnombre, HEapePat, HEapeMat, HEturno, HEhoraMinutosAhora, HEidDni);
-                    }
-                    else{
+                    } else {
                         exist = false;
-                        System.out.println("Exist2: "+exist);
+                        System.out.println("Exist2: " + exist);
                         mensajeNoHayDNI_Label.setVisible(true);
                         nombresTxtField_Lector.setText("");
                         apePaternoTxtField_Lector.setText(rs.getString(""));
@@ -193,21 +188,21 @@ public class Lector extends javax.swing.JFrame implements Runnable{
                         horaActualTxtField_Lector.setText(horaMinutosAhora);
                         dniTxtField_Lector.setText(rs.getString(""));
                     }
-                    
-                }catch(Exception e){
+
+                } catch (Exception e) {
                     //JOptionPane.showMessageDialog(null,"No se encontró registro"+e.getMessage());
                 }
-            }             
+            }
         }
     }
-    
+
     public Lector() {
         initComponents();
         mensajeNoHayDNI_Label.setVisible(false);
         setLocationRelativeTo(null);
     }
-   
-     /**
+
+    /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
      * regenerated by the Form Editor.
@@ -436,12 +431,12 @@ public class Lector extends javax.swing.JFrame implements Runnable{
     private void dniBuscadorTxtField_LectorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dniBuscadorTxtField_LectorActionPerformed
 
     }//GEN-LAST:event_dniBuscadorTxtField_LectorActionPerformed
-  
+
     private void leerLabel_LectorMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_leerLabel_LectorMouseClicked
         dniIngreso = Integer.parseInt(dniBuscadorTxtField_Lector.getText());
-        
+
         // EjScronizar.java
-        Datos dni= new Datos();
+        Datos dni = new Datos();
 
         HiloLector hilolector_dni = new HiloLector(dni);
         HiloEscritor hiloescribe_datos = new HiloEscritor(dni);
@@ -459,52 +454,48 @@ public class Lector extends javax.swing.JFrame implements Runnable{
     }//GEN-LAST:event_turnoTxtField_LectorActionPerformed
 
     private void leerLabel_Lector1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_leerLabel_Lector1MouseClicked
-        if(exist == true){
-            try{
-                java.util.Date date=new java.util.Date();
-                java.sql.Date sqlDate=new java.sql.Date(date.getTime());
+        if (exist == true) {
+            try {
+                java.util.Date date = new java.util.Date();
+                java.sql.Date sqlDate = new java.sql.Date(date.getTime());
                 java.sql.Timestamp sqlTime = new java.sql.Timestamp(date.getTime());
-                    
+
                 //String personalDNI_sql = "SELECT codigo_medico FROM medico INNER JOIN personal ON personal.id_dni = medico.id_dni_personal WHERE personal.id_dni = "+dniIngreso+"";
-                conetE2 = conE2.test();
+                conetE2 = ConnectionPool.getInstance().getConnection();
                 st2 = conetE2.createStatement();
                 //rs2 = st.executeQuery(personalDNI_sql);
                 CallableStatement cStmt = conetsE.prepareCall("{call SP_CODIGO_MEDICO_DNI (?)}");
                 cStmt.setInt(1, dniIngreso);
                 cStmt.execute();
                 final ResultSet rs2 = cStmt.getResultSet();
-                    
-                
+
                 int codigoPersonal = 0;
 
-                while(rs2.next()){
+                while (rs2.next()) {
                     codigoPersonal = rs2.getInt("codigo_medico");
                 }
 
                 String IngresarAsistencia_sql = "INSERT INTO lector_asistencia(id,dni_medico, fecha, hora) VALUES(default,?,?,?)";
-                    
-                conetE = conE.test();
+
+                conetE = ConnectionPool.getInstance().getConnection();
                 PreparedStatement ps = conetE.prepareStatement(IngresarAsistencia_sql);
                 ps.setInt(1, codigoPersonal);
-                ps.setDate(2,sqlDate);
-                ps.setTimestamp(3,sqlTime);
+                ps.setDate(2, sqlDate);
+                ps.setTimestamp(3, sqlTime);
                 ps.execute();
                 ps.close();
 
-                JOptionPane.showMessageDialog(null,"Asistencia registrada.");
-            } catch(SQLException ex){
-                ex.printStackTrace();
-                //JOptionPane.showMessageDialog(null,"Asistencia no registrada. Comuníquese con el administrador"+ex.getMessage());
-                JOptionPane.showMessageDialog(null,"Asistencia no registrada. Comuníquese con el administrador");
-                }
+                JOptionPane.showMessageDialog(null, "Asistencia registrada.");
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(null, "Asistencia no registrada. Comuníquese con el administrador: " + ex.getMessage());
             }
-            else{
-                JOptionPane.showMessageDialog(null,"DNI omiso o sin registro.");
-            }
+        } else {
+            JOptionPane.showMessageDialog(null, "DNI omiso o sin registro.");
+        }
     }//GEN-LAST:event_leerLabel_Lector1MouseClicked
 
     private void botonRegresar_LectorMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_botonRegresar_LectorMouseClicked
-        this.dispose(); 
+        this.dispose();
         new Home().setVisible(true);
     }//GEN-LAST:event_botonRegresar_LectorMouseClicked
 

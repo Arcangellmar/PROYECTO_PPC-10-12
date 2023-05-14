@@ -4,11 +4,9 @@
  */
 package Conexion;
 
+import Configuration.Configuration;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.dbcp2.BasicDataSource;
 
 /**
@@ -17,18 +15,17 @@ import org.apache.commons.dbcp2.BasicDataSource;
  */
 public class ConnectionPool {
 
-    private final String DB="proyectogh";
-    private final String URL="jdbc:mysql://localhost:33060/";
-    private final String USER="root";
-    private final String PASS="";
-    
+    private final String URL = Configuration.LoadConfig("URL");
+    private final String USER = Configuration.LoadConfig("USER");
+    private final String PASS = Configuration.LoadConfig("PASS");
+
     private static ConnectionPool dataSource;
-    private BasicDataSource basicDataSource=null;
-    
-    public ConnectionPool(){
-     
+    private BasicDataSource basicDataSource = null;
+
+    private ConnectionPool() {
         basicDataSource = new BasicDataSource();
         basicDataSource.setDriverClassName("com.mysql.jdbc.Driver");
+
         basicDataSource.setUsername(USER);
         basicDataSource.setPassword(PASS);
         basicDataSource.setUrl(URL);
@@ -37,9 +34,8 @@ public class ConnectionPool {
         basicDataSource.setMaxIdle(20);
         basicDataSource.setMaxTotal(50);
         basicDataSource.setMaxWaitMillis(-1);
-        
     }
-    
+
     public static ConnectionPool getInstance() {
         if (dataSource == null) {
             dataSource = new ConnectionPool();
@@ -49,12 +45,12 @@ public class ConnectionPool {
         }
     }
 
-    public Connection getConnection() throws SQLException{
-      return this.basicDataSource.getConnection();
+    public Connection getConnection() throws SQLException {
+        return this.basicDataSource.getConnection();
     }
-    
+
     public void closeConnection(Connection connection) throws SQLException {
         connection.close();
     }
-    
+
 }
