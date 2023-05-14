@@ -4,6 +4,7 @@
  */
 package Citas;
 
+import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
 /**
@@ -35,7 +36,7 @@ public class Dekker {
      * @param id Identificador del hilo, este solo puede ser 0 o 1.
      * @param seccionCritica Sección critica.
      */
-    public void comenzar(int id, Citas.SeccionCritica seccionCritica) {
+    public void comenzar(int id, Citas.SeccionCritica seccionCritica) throws SQLException {
         //Sección no critica.
         int otro = (id + 1) % 2;
         this.flag.set(id, 1);

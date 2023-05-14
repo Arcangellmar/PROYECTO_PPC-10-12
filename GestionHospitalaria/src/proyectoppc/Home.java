@@ -8,7 +8,6 @@ import InicioSesion.inicioSesion;
 import Lector.Lector;
 import java.awt.Color;
 import java.awt.Font;
-import static javax.swing.GroupLayout.Alignment.CENTER;
 public class Home extends javax.swing.JFrame {
 
     /**
