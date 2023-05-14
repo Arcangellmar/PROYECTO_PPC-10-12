@@ -5,6 +5,7 @@ import Conexion.TestDBConnectionPool;
 //import com.mysql.jdbc.Connection;
 //import com.mysql.jdbc.PreparedStatement;
 import java.sql.Connection;
+import java.sql.CallableStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
@@ -119,14 +120,19 @@ public class Lector extends javax.swing.JFrame implements Runnable{
         @Override
         public void run(){   
             for(int i=1;i<2;i++){
-                String mostrarDatos_sql = "SELECT personal.nombres, personal.apellido_paterno, personal.apellido_materno,"
-                        + "personal.turno, personal.id_dni FROM personal WHERE personal.id_dni = "+dniIngreso+"";
+                // String mostrarDatos_sql = "SELECT personal.nombres, personal.apellido_paterno, personal.apellido_materno,"
+                  //       + "personal.turno, personal.id_dni FROM personal WHERE personal.id_dni = "+dniIngreso+"";
                 
                 try{
                     Thread.sleep((int)(Math.random()*1000));
                     conetsE = consE.test();
                     st = conetsE.createStatement();
-                    rs = st.executeQuery(mostrarDatos_sql);
+                    //rs = st.executeQuery(mostrarDatos_sql);
+                    CallableStatement cStmt = conetsE.prepareCall("{call SP_PERSONAL_BUSCAR_DNI (?)}");
+                    cStmt.setInt(1, dniIngreso);
+                    cStmt.execute();
+                    final ResultSet rs = cStmt.getResultSet();
+                    
                     fechaAhora = LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
                     String nuevohrs;
                     String nuevomnts;
@@ -459,10 +465,16 @@ public class Lector extends javax.swing.JFrame implements Runnable{
                 java.sql.Date sqlDate=new java.sql.Date(date.getTime());
                 java.sql.Timestamp sqlTime = new java.sql.Timestamp(date.getTime());
                     
-                String personalDNI_sql = "SELECT codigo_medico FROM medico INNER JOIN personal ON personal.id_dni = medico.id_dni_personal WHERE personal.id_dni = "+dniIngreso+"";
+                //String personalDNI_sql = "SELECT codigo_medico FROM medico INNER JOIN personal ON personal.id_dni = medico.id_dni_personal WHERE personal.id_dni = "+dniIngreso+"";
                 conetE2 = conE2.test();
                 st2 = conetE2.createStatement();
-                rs2 = st.executeQuery(personalDNI_sql);
+                //rs2 = st.executeQuery(personalDNI_sql);
+                CallableStatement cStmt = conetsE.prepareCall("{call SP_CODIGO_MEDICO_DNI (?)}");
+                cStmt.setInt(1, dniIngreso);
+                cStmt.execute();
+                final ResultSet rs2 = cStmt.getResultSet();
+                    
+                
                 int codigoPersonal = 0;
 
                 while(rs2.next()){
