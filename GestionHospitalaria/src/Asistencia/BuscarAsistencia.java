@@ -22,6 +22,7 @@ public class BuscarAsistencia {
         Object [] asistenciasSearch = new Object[9];
         DefaultTableModel modelo = new DefaultTableModel(null, nombreColumna);
 
+        //YA NO SE USA QUERY
         //String sql =  "SELECT personal.nombres, personal.apellido_paterno, personal.apellido_materno, medico.id_dni_personal,\n" +
         //              "especialidad.nombre_especialidad, turno.descripcion, medico.hora_entrada, lector_asistencia.hora, timediff(lector_asistencia.hora, hora_entrada)FROM medico\n" +
         //              "INNER JOIN lector_asistencia ON lector_asistencia.dni_medico = medico.codigo_medico\n" +
@@ -35,6 +36,7 @@ public class BuscarAsistencia {
             cnE = cn.test();
             ste = cnE.createStatement();
             //rse = ste.executeQuery(sql);
+            //SE LLAMA AL SP NECESARIO
             CallableStatement cStmt = cnE.prepareCall("{call SP_ASISTENCIA_BUSCAR (?)}");
             cStmt.setString(1, buscar);
             cStmt.execute();

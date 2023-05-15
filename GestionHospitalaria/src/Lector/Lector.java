@@ -120,6 +120,7 @@ public class Lector extends javax.swing.JFrame implements Runnable{
         @Override
         public void run(){   
             for(int i=1;i<2;i++){
+                //SE COMENTA EL QUERY POR FALTA DE SEGURIDAD
                 // String mostrarDatos_sql = "SELECT personal.nombres, personal.apellido_paterno, personal.apellido_materno,"
                   //       + "personal.turno, personal.id_dni FROM personal WHERE personal.id_dni = "+dniIngreso+"";
                 
@@ -128,6 +129,7 @@ public class Lector extends javax.swing.JFrame implements Runnable{
                     conetsE = consE.test();
                     st = conetsE.createStatement();
                     //rs = st.executeQuery(mostrarDatos_sql);
+                    //SE BUSCA EL SP NECESARIO
                     CallableStatement cStmt = conetsE.prepareCall("{call SP_PERSONAL_BUSCAR_DNI (?)}");
                     cStmt.setInt(1, dniIngreso);
                     cStmt.execute();
