@@ -618,7 +618,11 @@ public class Historial extends javax.swing.JFrame {
             Thread hilo1 = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    dekker.comenzar(0, seccionCriticaDekker);
+                    try {
+                        dekker.comenzar(0, seccionCriticaDekker);
+                    } catch (SQLException ex) {
+                        Logger.getLogger(Historial.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
             });
             hilo1.start();
@@ -628,9 +632,13 @@ public class Historial extends javax.swing.JFrame {
                 @Override
                 public void run() {
 
-                    new Historial().setVisible(true);
-
-                    dekker.comenzar(1, seccionCriticaDekker);
+                    try {
+                        new Historial().setVisible(true);
+                        
+                        dekker.comenzar(1, seccionCriticaDekker);
+                    } catch (SQLException ex) {
+                        Logger.getLogger(Historial.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
             });
             hilo2.start();

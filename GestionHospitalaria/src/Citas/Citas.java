@@ -489,7 +489,11 @@ public class Citas extends javax.swing.JFrame {
             Thread hilo1 = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    dekker.comenzar(0, seccionCriticaDekker);
+                    try {
+                        dekker.comenzar(0, seccionCriticaDekker);
+                    } catch (SQLException ex) {
+                        Logger.getLogger(Citas.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
             });
             hilo1.start();
@@ -501,7 +505,11 @@ public class Citas extends javax.swing.JFrame {
 
                     new Citas().setVisible(true);
 
-                    dekker.comenzar(1, seccionCriticaDekker);
+                    try {
+                        dekker.comenzar(1, seccionCriticaDekker);
+                    } catch (SQLException ex) {
+                        Logger.getLogger(Citas.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
             });
             hilo2.start();

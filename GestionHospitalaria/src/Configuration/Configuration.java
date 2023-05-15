@@ -25,7 +25,6 @@ public class Configuration {
         String value = "";
 
         try {
-            //configInput = Configuration.class.getClassLoader().getResourceAsStream("config.properties");
             String directoryName = Configuration.class.getClassLoader().getResource("Configuration").getPath();            
             configInput = new FileInputStream(directoryName+"/config.properties");
             config.load(configInput);
