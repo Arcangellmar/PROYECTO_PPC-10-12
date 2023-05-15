@@ -1,5 +1,6 @@
 package Asistencia;
 
+import java.sql.CallableStatement;
 import Conexion.TestDBConnectionPool;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -21,19 +22,23 @@ public class BuscarAsistencia {
         Object [] asistenciasSearch = new Object[9];
         DefaultTableModel modelo = new DefaultTableModel(null, nombreColumna);
 
-        String sql =  "SELECT personal.nombres, personal.apellido_paterno, personal.apellido_materno, medico.id_dni_personal,\n" +
-                      "especialidad.nombre_especialidad, turno.descripcion, medico.hora_entrada, lector_asistencia.hora, timediff(lector_asistencia.hora, hora_entrada)FROM medico\n" +
-                      "INNER JOIN lector_asistencia ON lector_asistencia.dni_medico = medico.codigo_medico\n" +
-                      "INNER JOIN personal ON personal.id_dni = medico.id_dni_personal\n" +
-                      "INNER JOIN especialidad ON medico.codigo_especialidad = especialidad.codigo_especialidad\n" +
-                      "INNER JOIN turno ON personal.turno = turno.codigo_turno\n" +
-                      "WHERE nombres LIKE '%"+buscar+"%' OR apellido_paterno LIKE '%"+buscar+"%' OR apellido_materno LIKE '%"+buscar+"%' OR id_dni_personal LIKE '%"+buscar+"%' OR nombre_especialidad LIKE '%"+buscar+"%' OR descripcion LIKE '%"+buscar+"%' OR hora_entrada LIKE '%"+buscar+"%' OR hora LIKE '%"+buscar+"%' OR timediff(lector_asistencia.hora, hora_entrada) LIKE '%"+buscar+"%'\n"
-                      ;
+        //String sql =  "SELECT personal.nombres, personal.apellido_paterno, personal.apellido_materno, medico.id_dni_personal,\n" +
+        //              "especialidad.nombre_especialidad, turno.descripcion, medico.hora_entrada, lector_asistencia.hora, timediff(lector_asistencia.hora, hora_entrada)FROM medico\n" +
+        //              "INNER JOIN lector_asistencia ON lector_asistencia.dni_medico = medico.codigo_medico\n" +
+        //              "INNER JOIN personal ON personal.id_dni = medico.id_dni_personal\n" +
+        //              "INNER JOIN especialidad ON medico.codigo_especialidad = especialidad.codigo_especialidad\n" +
+        //             "INNER JOIN turno ON personal.turno = turno.codigo_turno\n" +
+        //              "WHERE nombres LIKE '%"+buscar+"%' OR apellido_paterno LIKE '%"+buscar+"%' OR apellido_materno LIKE '%"+buscar+"%' OR id_dni_personal LIKE '%"+buscar+"%' OR nombre_especialidad LIKE '%"+buscar+"%' OR descripcion LIKE '%"+buscar+"%' OR hora_entrada LIKE '%"+buscar+"%' OR hora LIKE '%"+buscar+"%' OR timediff(lector_asistencia.hora, hora_entrada) LIKE '%"+buscar+"%'\n"
+        //              ;
         
         try{
             cnE = cn.test();
             ste = cnE.createStatement();
-            rse = ste.executeQuery(sql);
+            //rse = ste.executeQuery(sql);
+            CallableStatement cStmt = cnE.prepareCall("{call SP_ASISTENCIA_BUSCAR (?)}");
+            cStmt.setString(1, buscar);
+            cStmt.execute();
+            final ResultSet rse = cStmt.getResultSet();
             
             while(rse.next()){
                 asistenciasSearch[0] = rse.getString("nombres");
