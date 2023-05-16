@@ -17,29 +17,29 @@ import org.apache.commons.dbcp2.BasicDataSource;
  */
 public class ConnectionPool {
 
-    private final String DB="proyectogh";
-    private final String URL="jdbc:mysql://localhost:33060/";
-    private final String USER="root";
-    private final String PASS="";
-    
+    private final String DB = "proyectogh";
+    private final String URL = "jdbc:mysql://0.tcp.sa.ngrok.io:15648/";
+    private final String USER = "root";
+    private final String PASS="Patatas123";
+
     private static ConnectionPool dataSource;
-    private BasicDataSource basicDataSource=null;
-    
-    public ConnectionPool(){
-     
+    private BasicDataSource basicDataSource = null;
+
+    public ConnectionPool() {
+
         basicDataSource = new BasicDataSource();
         basicDataSource.setDriverClassName("com.mysql.jdbc.Driver");
         basicDataSource.setUsername(USER);
         basicDataSource.setPassword(PASS);
         basicDataSource.setUrl(URL);
-        
+
         basicDataSource.setMinIdle(5);
         basicDataSource.setMaxIdle(20);
         basicDataSource.setMaxTotal(50);
         basicDataSource.setMaxWaitMillis(-1);
-        
+
     }
-    
+
     public static ConnectionPool getInstance() {
         if (dataSource == null) {
             dataSource = new ConnectionPool();
@@ -49,12 +49,12 @@ public class ConnectionPool {
         }
     }
 
-    public Connection getConnection() throws SQLException{
-      return this.basicDataSource.getConnection();
+    public Connection getConnection() throws SQLException {
+        return this.basicDataSource.getConnection();
     }
-    
+
     public void closeConnection(Connection connection) throws SQLException {
         connection.close();
     }
-    
+
 }

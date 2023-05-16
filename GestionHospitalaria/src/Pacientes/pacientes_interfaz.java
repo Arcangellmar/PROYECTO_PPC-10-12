@@ -35,79 +35,85 @@ public class pacientes_interfaz extends javax.swing.JFrame {
     int idE;
     TableRowSorter trsfiltro;
     String filtro;
+    PacienteDAO pacienteDAO = PacienteFactory.methodsDAO();
+
     public pacientes_interfaz() {
         initComponents();
 //        mostrarpacientes();
         setLocationRelativeTo(null);
         mostrarpacientes();
     }
-    void mostrarpacientes(){
-        String sql ="SELECT * from pacientes";
-        try{
+
+    void mostrarpacientes() {
+        String sqlConsult = pacienteDAO.mostrarPacientesSQL();
+        try {
             //conetE = conE.Conectar();
             conetE = conE.test();
             st = conetE.createStatement();
 
-            rs = st.executeQuery(sql);
-           
+            rs = st.executeQuery(sqlConsult);
+
             Object[] pacientes = new Object[8];
-            
+            System.out.println("s");
             modelo = (DefaultTableModel) this.TablaPacientes.getModel();
-            while(rs.next()){
-                pacientes [0] = rs.getString("id_dni");
-                pacientes [1] = rs.getString("apellido_paterno");
-                pacientes [2] = rs.getString("apellido_materno");
-                pacientes [3] = rs.getString("nombres");
-                pacientes [4] = rs.getString("eps");
-                pacientes [5] = rs.getString("fecha_nacimiento");
-                pacientes [6] = rs.getString("genero");
-                pacientes [7] = rs.getInt("telefono");
-                
+            while (rs.next()) {
+                pacientes[0] = rs.getString("id_dni");
+                pacientes[1] = rs.getString("apellido_paterno");
+                pacientes[2] = rs.getString("apellido_materno");
+                pacientes[3] = rs.getString("nombres");
+                pacientes[4] = rs.getString("eps");
+                pacientes[5] = rs.getString("fecha_nacimiento");
+                pacientes[6] = rs.getString("genero");
+                pacientes[7] = rs.getInt("telefono");
+
                 modelo.addRow(pacientes);
             }
             TablaPacientes.setModel(modelo);
-        }catch(SQLException e){
-            
+        } catch (SQLException e) {
+
         }
     }
-        public void registrar(){
+
+    public void registrar() {
         //Connection con1 = new Conexion().Conectar();
         Connection con1 = new TestDBConnectionPool().test();
-        paciente_modelo uno = new paciente_modelo(); 
-        if(this.dni_reg.getText().isBlank()){
-             JOptionPane.showMessageDialog(this, "Uno o mas campos estan vacios. Favor de llenarlos.");
+        paciente_modelo uno = new paciente_modelo();
+        if (this.dni_reg.getText().isBlank()) {
+            JOptionPane.showMessageDialog(this, "Uno o mas campos estan vacios. Favor de llenarlos.");
         }
-       
-            String sql="INSERT INTO `paciente`(`id_dni`, `nombres`, `apellido_paterno`, `apellido_materno`, `fecha_nacimiento`, `genero`, `eps`, `telefono`) VALUES (?,?,?,?,?,?,?,?)";
-            try {
-                PreparedStatement psd=(PreparedStatement) con1.prepareStatement(sql);
-                psd.setString(1, this.dni_reg.getText());
-                psd.setString(2, this.nomb.getText());
-                psd.setString(3, ap.getText());
-                psd.setString(4, am.getText());
-                psd.setString(5, this.fn.getText());
-                psd.setString(6, this.sexo.getText());
-                psd.setString(7, eps.getText());
-                psd.setString(8, telef.getText());
-            
-            int n=psd.executeUpdate();
-            if(n>0){
+        String sqlConsult = pacienteDAO.registrarPacientSQL();
+        
+        try {
+            PreparedStatement psd = (PreparedStatement) con1.prepareStatement(sqlConsult);
+            psd.setString(1, this.dni_reg.getText());
+            psd.setString(2, this.nomb.getText());
+            psd.setString(3, ap.getText());
+            psd.setString(4, am.getText());
+            psd.setString(5, this.fn.getText());
+            psd.setString(6, this.sexo.getText());
+            psd.setString(7, eps.getText());
+            psd.setString(8, telef.getText());
+
+            int n = psd.executeUpdate();
+            if (n > 0) {
                 JOptionPane.showMessageDialog(null, "Registro Guardado");
             }
-            } catch (SQLException e) {
-                System.err.print(e.toString());
-                JOptionPane.showMessageDialog(this, "Ocurrio un error inesperado.\nFavor comunicarse con el administrador.");
-            }
+        } catch (SQLException e) {
+            System.err.print(e.toString());
+            JOptionPane.showMessageDialog(this, "Ocurrio un error inesperado.\nFavor comunicarse con el administrador.");
+        }
     }
-        public void buscarpaciente(String buscar){
+
+    public void buscarpaciente(String buscar) {
         this.TablaPacientes.setModel(modelo);
     }
-        public void buscar(String buscar){
-        buscar p = new buscar();
-        
-        DefaultTableModel modelo = p.buscar(buscar);
+
+    public void buscar(String dni) {
+
+        DefaultTableModel modelo = pacienteDAO.buscar(dni);
         TablaPacientes.setModel(modelo);
-    } 
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -384,14 +390,13 @@ public class pacientes_interfaz extends javax.swing.JFrame {
 
     private void jPanel2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jPanel2MouseClicked
         // TODO add your handling code here:
-        if(this.dni_buscar.getText().isBlank()){
+        if (this.dni_buscar.getText().isBlank()) {
             JOptionPane.showMessageDialog(this, "Uno o mas campos estan vacios. Favor de llenarlos.");
-            
-        }
-        else{
+
+        } else {
             buscar(this.dni_buscar.getText());
         }
-        
+
     }//GEN-LAST:event_jPanel2MouseClicked
 
     private void jButton2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton2MouseClicked
@@ -406,7 +411,7 @@ public class pacientes_interfaz extends javax.swing.JFrame {
         this.dni_buscar.setText("");
         this.telef.setText("");
         this.sexo.setText("");
-        
+
         mostrarpacientes();
     }//GEN-LAST:event_jButton2MouseClicked
 
