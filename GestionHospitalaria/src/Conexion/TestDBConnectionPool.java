@@ -21,10 +21,10 @@ public class TestDBConnectionPool {
      * @param args the command line arguments
      */
     //introduce las condiciones de la conexión.
-    private final String DB="proyectogh";
-    private final String URL="jdbc:mysql://localhost:33060/";
+   private final String DB="proyectogh";
+    private final String URL="jdbc:mysql://localhost:3306/";
     private final String USER="root";
-    private final String PASS="";
+    private final String PASS="Excelentexd1?";
     String driver = "com.mysql.jdbc.Driver"; //com.mysql.cj.jdbc.Driver
     
     Connection cx;

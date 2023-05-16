@@ -18,9 +18,9 @@ import org.apache.commons.dbcp2.BasicDataSource;
 public class ConnectionPool {
 
     private final String DB="proyectogh";
-    private final String URL="jdbc:mysql://localhost:33060/";
+    private final String URL="jdbc:mysql://localhost:3306/";
     private final String USER="root";
-    private final String PASS="";
+    private final String PASS="Excelentexd1?";
     
     private static ConnectionPool dataSource;
     private BasicDataSource basicDataSource=null;
