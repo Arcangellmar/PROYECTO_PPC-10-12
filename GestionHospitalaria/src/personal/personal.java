@@ -4,7 +4,7 @@
  */
 package personal;
 
-import Conexion.ConnectionPool;
+import Conexion.TestDBConnectionPool;
 import InicioSesion.inicioAdministrativo;
 import com.mysql.jdbc.Blob;
 import com.mysql.jdbc.PreparedStatement;
@@ -15,6 +15,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import static java.lang.constant.ConstantDescs.NULL;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -29,15 +30,20 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
 
+
 /**
  *
  * @author Lisett y Valeria
  */
 public class personal extends javax.swing.JFrame {
 
+    /**
+     * Creates new form personal
+     */
+    TestDBConnectionPool conE = new TestDBConnectionPool();
     String path;
-    File image;
-    FileInputStream fis;
+    File image; 
+    FileInputStream fis; 
     Connection conetE;
     DefaultTableModel modelo;
     Statement st;
@@ -45,53 +51,50 @@ public class personal extends javax.swing.JFrame {
     int idE;
     TableRowSorter trsfiltro;
     String filtro;
-
     public personal() {
         initComponents();
-        setLocationRelativeTo(null);
+         setLocationRelativeTo(null);
         mostrarpersonal();
     }
-
-    void mostrarpersonal() {
-        String sql = "SELECT * FROM personal p INNER JOIN medico m ON p.id_dni = m.id_dni_personal INNER JOIN turno t ON p.turno = t.codigo_turno INNER JOIN especialidad e ON m.codigo_especialidad = e.codigo_especialidad";
-        try {
-            conetE = ConnectionPool.getInstance().getConnection();
+    void mostrarpersonal(){
+        String sql ="SELECT * FROM personal p INNER JOIN medico m ON p.id_dni = m.id_dni_personal INNER JOIN turno t ON p.turno = t.codigo_turno INNER JOIN especialidad e ON m.codigo_especialidad = e.codigo_especialidad";
+        try{
+            conetE = conE.test();
             st = conetE.createStatement();
             rs = st.executeQuery(sql);
             Object[] especialistas = new Object[8];
             modelo = (DefaultTableModel) this.TablaPersonal.getModel();
-
-            while (rs.next()) {
+            
+            while(rs.next()){
                 System.out.println("HOLA");
-                especialistas[0] = rs.getString("nombres");
-
-                especialistas[1] = rs.getString("apellido_paterno");
-                especialistas[2] = rs.getString("apellido_materno");
-                especialistas[3] = rs.getString("nombre_especialidad");
-                especialistas[4] = rs.getString("descripcion");
-                especialistas[5] = rs.getString("genero");
-                especialistas[6] = rs.getString("fecha_nacimiento");
-                especialistas[7] = rs.getString("telefono");
-
+                especialistas [0] = rs.getString("nombres");
+              
+                especialistas [1] = rs.getString("apellido_paterno");
+                especialistas [2] = rs.getString("apellido_materno");
+                especialistas [3] = rs.getString("nombre_especialidad");
+                especialistas [4] = rs.getString("descripcion");
+                especialistas [5] = rs.getString("genero");
+                especialistas [6] = rs.getString("fecha_nacimiento");
+                especialistas [7] = rs.getString("telefono");
+                
                 modelo.addRow(especialistas);
             }
             TablaPersonal.setModel(modelo);
-        } catch (Exception e) {
-
+        }catch(Exception e){
+            
         }
     }
-
-    public void buscar(int dni) throws SQLException {
-        Connection con1 = ConnectionPool.getInstance().getConnection();
+    public void buscar(int dni) {
+        Connection con1 = new TestDBConnectionPool().test();
         PreparedStatement pst = null;
         ResultSet rs = null;
-        persona uno = new persona();
-
-        if (dni < 0 || dni == 0) {
+        persona uno = new persona(); 
+        
+        if (dni<0|| dni==0) {
             JOptionPane.showMessageDialog(this, "Uno o mas campos estan vacios. Favor de llenarlos.");
         } else {
             try {
-                pst = (PreparedStatement) con1.prepareStatement("SELECT * FROM personal p INNER JOIN medico m ON p.id_dni = m.id_dni_personal INNER JOIN turno t ON p.turno = t.codigo_turno INNER JOIN especialidad e ON m.codigo_especialidad = e.codigo_especialidad WHERE id_dni=" + dni);
+                pst = (PreparedStatement) con1.prepareStatement("SELECT * FROM personal p INNER JOIN medico m ON p.id_dni = m.id_dni_personal INNER JOIN turno t ON p.turno = t.codigo_turno INNER JOIN especialidad e ON m.codigo_especialidad = e.codigo_especialidad WHERE id_dni="+dni);
                 rs = pst.executeQuery();
                 if (rs.next()) {
                     uno.setFoto((Blob) rs.getBlob("foto"));
@@ -104,7 +107,7 @@ public class personal extends javax.swing.JFrame {
                     uno.setEspecialidad(rs.getString("nombre_especialidad"));
                     uno.setTelef(rs.getInt("telefono"));
                     uno.setSexo(rs.getString("genero"));
-                    colocar(uno);
+                    colocar(uno); 
                 } else {
                     JOptionPane.showMessageDialog(this, "NO EXISTE ESTE DNI.");
                 }
@@ -115,86 +118,112 @@ public class personal extends javax.swing.JFrame {
                 Logger.getLogger(personal.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+    } 
+    
+    //Funcion eliminar en la base de datos: 
+    
+    public void eliminar(int dni){
+        //Connection con1 = new TestDBConnectionPool().test();
+        Connection con1 = null;
+        PreparedStatement pst = null;
+        
+        persona uno = new persona();
+         if (dni<0|| dni==0) {
+            JOptionPane.showMessageDialog(this, "Uno o mas campos estan vacios. Favor de llenarlos.");
+        } else {
+             try {
+                pst = (PreparedStatement) con1.prepareStatement("DELETE FROM personal p INNER JOIN medico m ON p.id_dni = m.id_dni_personal WHERE id_dni="+dni);
+                int rs = pst.executeUpdate();
+                if (rs>0) {
+                    JOptionPane.showMessageDialog(null, "Persona Eliminada");
+                } else {
+                    JOptionPane.showMessageDialog(this, "NO EXISTE ESTE DNI.");
+                }
+            } catch (SQLException e) {
+                System.err.print(e.toString());
+                JOptionPane.showMessageDialog(this, "Ocurrio un error inesperado.\nFavor comunicarse con el administrador.");
+            } // catch (IOException ex) {
+              //  Logger.getLogger(personal.class.getName()).log(Level.SEVERE, null, ex);
+            //}
+         }
+        
     }
-
-    public void colocar(persona per) throws SQLException, IOException {
+    public void colocar(persona per) throws SQLException, IOException{
         this.pnom.setText(per.getNombres());
         this.am.setText(per.getAm());
         this.ap.setText(per.getAp());
 //        this.turno.setSelectedIndex(Integer.parseInt(per.getTurno().trim()));
 //        this.foto.setText(per.getFoto());
-        this.dni1.setText(per.getDni() + "");
-        this.telef.setText(per.getTelef() + "");
-        this.nac.setText(per.getNacim() + "");
+        this.dni1.setText(per.getDni()+"");
+        this.telef.setText(per.getTelef()+"");
+        this.nac.setText(per.getNacim()+"");
         this.sex.setSelectedItem(per.getSexo());
         this.especialidad.setSelectedItem(per.getEspecialidad());
         this.especialidad.setSelectedIndex(Integer.parseInt(per.getTurno().trim()));
-        InputStream in = per.getFoto().getBinaryStream();
+        InputStream in = per.getFoto().getBinaryStream();  
         BufferedImage imagen = ImageIO.read(in);
         Image image = imagen.getScaledInstance(80, 100, Image.SCALE_DEFAULT);
         this.foto.setIcon((new ImageIcon(image)));
         this.foto.setText("");
-
+        
     }
-
-    public void registrar() throws SQLException {
-        Connection con1 = ConnectionPool.getInstance().getConnection();
-        persona uno = new persona();
-        int dni2 = Integer.parseInt(this.dni1.getText().trim());
+    public void registrar(){
+        Connection con1 = new TestDBConnectionPool().test();
+        persona uno = new persona(); 
+        int dni2=Integer.parseInt(this.dni1.getText().trim());
         PreparedStatement pst = null;
         ResultSet rs = null;
         //JOptionPane.showMessageDialog(this, "Uno o mas campos estan vacios. Favor de llenarlos.");
-        String sql1 = "INSERT INTO usuario(usuario, contrasenia) VALUES (?,?)";
-        try {
-            PreparedStatement psd = (PreparedStatement) con1.prepareStatement(sql1);
-
-            psd.setString(1, dni1.getText().trim());
-            psd.setString(2, dni1.getText().trim());
-            // psd.setString(3, "NULL");
-            int n = psd.executeUpdate();
-            if (n > 0) {
+            String sql1= "INSERT INTO usuario(usuario, contrasenia) VALUES (?,?)";
+            try{
+                PreparedStatement psd=(PreparedStatement) con1.prepareStatement(sql1);
+ 
+                psd.setString(1, dni1.getText().trim());
+                psd.setString(2, dni1.getText().trim());
+               // psd.setString(3, "NULL");
+            int n=psd.executeUpdate();
+            if(n>0){
                 JOptionPane.showMessageDialog(null, "registroguardado");
             }
-        } catch (SQLException e) {
-            System.err.print(e.toString());
-            JOptionPane.showMessageDialog(this, "Ocurrio un error inesperado.\nFavor comunicarse con el administrador.");
-        }
-        try {
-            pst = (PreparedStatement) con1.prepareStatement("SELECT id_usuario FROM usuario where usuario=" + dni2);
-            rs = pst.executeQuery();
-            if (rs.next()) {
-                uno.setId(Integer.parseInt(rs.getString("id_usuario")));
-            } else {
-                JOptionPane.showMessageDialog(this, "NO EXISTE ESTE DNI.");
+            }catch(SQLException e) {
+                System.err.print(e.toString());
+                JOptionPane.showMessageDialog(this, "Ocurrio un error inesperado.\nFavor comunicarse con el administrador.");
             }
-        } catch (SQLException e) {
-            System.err.print(e.toString());
-            JOptionPane.showMessageDialog(this, "Ocurrio un error inesperado.\nFavor comunicarse con el administrador.");
-        }
-        String sql = "INSERT INTO personal (nombres,apellido_paterno,apellido_materno,turno,id_dni,telefono,fecha_nacimiento,genero, foto,id_usuario) VALUES (?,?,?,?,?,?,?,?,?,?)";
-        try {
-            PreparedStatement psd = (PreparedStatement) con1.prepareStatement(sql);
-            psd.setString(1, pnom.getText());
-            psd.setString(2, ap.getText());
-            psd.setString(3, am.getText());
-            psd.setInt(4, especialidad.getSelectedIndex());
-            psd.setString(5, dni1.getText());
-            psd.setString(6, telef.getText());
-            psd.setString(7, nac.getText());
-            psd.setString(8, sex.getSelectedItem().toString());
-            psd.setBinaryStream(9, fis, (int) image.length());
-            psd.setString(10, uno.getId() + "");
-
-            int n = psd.executeUpdate();
-            if (n > 0) {
+            try {
+                pst = (PreparedStatement) con1.prepareStatement("SELECT id_usuario FROM usuario where usuario="+dni2);
+                rs = pst.executeQuery();
+                if (rs.next()) {
+                    uno.setId(Integer.parseInt(rs.getString("id_usuario"))); 
+                } else {
+                    JOptionPane.showMessageDialog(this, "NO EXISTE ESTE DNI.");
+                }
+            } catch (SQLException e) {
+                System.err.print(e.toString());
+                JOptionPane.showMessageDialog(this, "Ocurrio un error inesperado.\nFavor comunicarse con el administrador.");
+            }
+            String sql="INSERT INTO personal (nombres,apellido_paterno,apellido_materno,turno,id_dni,telefono,fecha_nacimiento,genero, foto,id_usuario) VALUES (?,?,?,?,?,?,?,?,?,?)";
+            try {
+                PreparedStatement psd=(PreparedStatement) con1.prepareStatement(sql);
+                psd.setString(1, pnom.getText());
+                psd.setString(2, ap.getText());
+                psd.setString(3, am.getText());
+                psd.setInt(4, especialidad.getSelectedIndex());
+                psd.setString(5, dni1.getText());
+                psd.setString(6, telef.getText());
+                psd.setString(7, nac.getText());
+                psd.setString(8, sex.getSelectedItem().toString());
+                psd.setBinaryStream(9, fis, (int) image.length());
+                psd.setString(10,uno.getId()+"");
+            
+            int n=psd.executeUpdate();
+            if(n>0){
                 JOptionPane.showMessageDialog(null, "Registro Guardado");
             }
-        } catch (SQLException e) {
-            System.err.print(e.toString());
-            JOptionPane.showMessageDialog(this, "Ocurrio un error inesperado.\nFavor comunicarse con el administrador.");
-        }
+            } catch (SQLException e) {
+                System.err.print(e.toString());
+                JOptionPane.showMessageDialog(this, "Ocurrio un error inesperado.\nFavor comunicarse con el administrador.");
+            }
     }
-
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -232,7 +261,7 @@ public class personal extends javax.swing.JFrame {
         jScrollPane2 = new javax.swing.JScrollPane();
         TablaPersonal = new javax.swing.JTable();
         jPanel2 = new javax.swing.JPanel();
-        jLabel4 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
         jPanel5 = new javax.swing.JPanel();
         jLabel3 = new javax.swing.JLabel();
         jPanel3 = new javax.swing.JPanel();
@@ -242,8 +271,8 @@ public class personal extends javax.swing.JFrame {
         foto = new javax.swing.JLabel();
         turno1 = new javax.swing.JComboBox<>();
         botonRegresar_personal = new javax.swing.JButton();
-        jPanel4 = new javax.swing.JPanel();
-        jLabel5 = new javax.swing.JLabel();
+        jPanel1 = new javax.swing.JPanel();
+        jLabel4 = new javax.swing.JLabel();
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -368,23 +397,23 @@ public class personal extends javax.swing.JFrame {
             }
         });
 
-        jLabel4.setFont(new java.awt.Font("Inter SemiBold", 0, 14)); // NOI18N
-        jLabel4.setText("BUSCAR");
+        jLabel2.setFont(new java.awt.Font("Inter SemiBold", 0, 14)); // NOI18N
+        jLabel2.setText("BUSCAR");
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGap(40, 40, 40)
-                .addComponent(jLabel4)
-                .addContainerGap(43, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addContainerGap(45, Short.MAX_VALUE)
+                .addComponent(jLabel2)
+                .addGap(38, 38, 38))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel4)
+                .addComponent(jLabel2)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -487,44 +516,45 @@ public class personal extends javax.swing.JFrame {
         });
         background.add(botonRegresar_personal, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 120, 80, 30));
 
-        jPanel4.setBackground(new java.awt.Color(255, 51, 51));
-        jPanel4.addMouseListener(new java.awt.event.MouseAdapter() {
+        jPanel1.setBackground(new java.awt.Color(255, 153, 153));
+        jPanel1.setForeground(new java.awt.Color(255, 0, 0));
+        jPanel1.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jPanel4MouseClicked(evt);
+                jPanel1MouseClicked(evt);
             }
         });
 
-        jLabel5.setFont(new java.awt.Font("Inter SemiBold", 0, 14)); // NOI18N
-        jLabel5.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel5.setText("ELIMINAR");
+        jLabel4.setText("ELIMINAR");
+        jLabel4.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel4MouseClicked(evt);
+            }
+        });
 
-        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
-        jPanel4.setLayout(jPanel4Layout);
-        jPanel4Layout.setHorizontalGroup(
-            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
-                .addContainerGap(42, Short.MAX_VALUE)
-                .addComponent(jLabel5)
-                .addGap(41, 41, 41))
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap(36, Short.MAX_VALUE)
+                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(22, 22, 22))
         );
-        jPanel4Layout.setVerticalGroup(
-            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jLabel5)
-                .addContainerGap())
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel4)
+                .addContainerGap(8, Short.MAX_VALUE))
         );
 
-        background.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 180, -1, -1));
+        background.add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(580, 180, 120, 30));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(background, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGap(146, 146, 146))
+            .addComponent(background, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 1300, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -534,26 +564,18 @@ public class personal extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jPanel2MouseClicked(java.awt.event.MouseEvent evt) {                                     
-        try {
-            // TODO add your handling code here:
-            int dni = Integer.parseInt(this.dni_buscar.getText().trim());
-            buscar(dni);
-        } catch (SQLException ex) {
-            Logger.getLogger(personal.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-    }                                    
+    private void jPanel2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jPanel2MouseClicked
+        // TODO add your handling code here:
+        int dni = Integer.parseInt(this.dni_buscar.getText().trim()); 
+        buscar(dni);
+        
+    }//GEN-LAST:event_jPanel2MouseClicked
 
     private void dni_buscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dni_buscarActionPerformed
-        try {
-            // TODO add your handling code here:
-            int dni = Integer.parseInt(this.dni_buscar.getText().trim());
-            buscar(dni);
-        } catch (SQLException ex) {
-            Logger.getLogger(personal.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
+        // TODO add your handling code here:
+        int dni = Integer.parseInt(this.dni_buscar.getText().trim()); 
+        buscar(dni);
+        
     }//GEN-LAST:event_dni_buscarActionPerformed
 
     private void jPanel3MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jPanel3MouseClicked
@@ -574,15 +596,12 @@ public class personal extends javax.swing.JFrame {
 
     private void jPanel5MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jPanel5MouseClicked
 //         TODO add your handling code here:
-        if (!pnom.getText().isEmpty()
-                && !am.getText().isEmpty() && !ap.getText().isEmpty() && !dni1.getText().isEmpty() && !telef.getText().isEmpty() && !this.nac.getText().isEmpty() && !path.isEmpty() && this.especialidad.getSelectedIndex() != 0 && sex.getSelectedIndex() != 0) {
-            try {
-                registrar();
-            } catch (SQLException ex) {
-                Logger.getLogger(personal.class.getName()).log(Level.SEVERE, null, ex);
-            }
-
-        } else {
+        if(!pnom.getText().isEmpty()&&
+                !am.getText().isEmpty() && !ap.getText().isEmpty() && !dni1.getText().isEmpty() && !telef.getText().isEmpty()&& !this.nac.getText().isEmpty() &&!path.isEmpty()&&this.especialidad.getSelectedIndex()!=0&& sex.getSelectedIndex()!=0){         
+            registrar();
+         
+        }
+        else {
             JOptionPane.showMessageDialog(null, "DEBE LLENAR TODOS LOS CAMPOS. ");
         }
     }//GEN-LAST:event_jPanel5MouseClicked
@@ -590,28 +609,28 @@ public class personal extends javax.swing.JFrame {
     private void fotoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_fotoMouseClicked
         // TODO add your handling code here:
         JFileChooser fileChooser = new JFileChooser();
+        
+    fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+    
+    FileNameExtensionFilter imgFilter = new FileNameExtensionFilter("JPG & GIF Images", "jpg", "gif"); 
+    fileChooser.setFileFilter(imgFilter);
 
-        fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+    int result = fileChooser.showOpenDialog(this);
 
-        FileNameExtensionFilter imgFilter = new FileNameExtensionFilter("JPG & GIF Images", "jpg", "gif");
-        fileChooser.setFileFilter(imgFilter);
+    if (result != JFileChooser.CANCEL_OPTION) {
 
-        int result = fileChooser.showOpenDialog(this);
+        File fileName = fileChooser.getSelectedFile();
 
-        if (result != JFileChooser.CANCEL_OPTION) {
-
-            File fileName = fileChooser.getSelectedFile();
-
-            if ((fileName == null) || (fileName.getName().equals(""))) {
-                System.out.println("");
-            } else {
-                path = fileName.getAbsolutePath();
-            }
+        if ((fileName == null) || (fileName.getName().equals(""))) {
+            System.out.println("");
+        } else {
+            path = fileName.getAbsolutePath();
         }
-
-        image = new File(path);
+    }
+    
+    image = new File(path);
         try {
-            fis = new FileInputStream(image);
+             fis = new FileInputStream (image);
         } catch (FileNotFoundException ex) {
             Logger.getLogger(personal.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -626,16 +645,16 @@ public class personal extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_botonRegresar_personalActionPerformed
 
-    private void jPanel4MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jPanel4MouseClicked
+    private void jPanel1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jPanel1MouseClicked
         // TODO add your handling code here:
-    }//GEN-LAST:event_jPanel4MouseClicked
+        //AGREGAR accion con la clase eliminar 
+        int dni=Integer.parseInt(this.dni_buscar.getText().trim());
+        eliminar(dni);
+    }//GEN-LAST:event_jPanel1MouseClicked
 
-    private void jPanel2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jPanel2MouseClicked
+    private void jLabel4MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel4MouseClicked
         // TODO add your handling code here:
-        int dni = Integer.parseInt(this.dni_buscar.getText().trim());
-        buscar(dni);
-
-    }//GEN-LAST:event_jPanel2MouseClicked
+    }//GEN-LAST:event_jLabel4MouseClicked
 
     /**
      * @param args the command line arguments
@@ -690,12 +709,12 @@ public class personal extends javax.swing.JFrame {
     private javax.swing.JLabel foto;
     private javax.swing.JLabel fotoLabel;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
-    private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
