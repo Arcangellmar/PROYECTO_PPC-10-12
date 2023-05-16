@@ -11,6 +11,7 @@ import javax.swing.table.DefaultTableModel;
 
 public class BuscarAsistencia {
 
+    ConnectionPool cn = new ConnectionPool();
     Connection cnE;
     DefaultTableModel modeloE;
     Statement ste;
@@ -33,7 +34,7 @@ public class BuscarAsistencia {
         //              ;
         
         try{
-            cnE = cn.test();
+            cnE = cn.getConnection();
             ste = cnE.createStatement();
             //rse = ste.executeQuery(sql);
             //SE LLAMA AL SP NECESARIO

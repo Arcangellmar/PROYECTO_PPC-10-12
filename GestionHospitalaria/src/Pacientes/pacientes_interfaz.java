@@ -5,7 +5,7 @@
  */
 package Pacientes;
 
-import Conexion.TestDBConnectionPool;
+import Conexion.ConnectionPool;
 import StaffMedico.Buscar;
 import InicioSesion.inicioRecepcionista;
 import com.mysql.jdbc.PreparedStatement;
@@ -13,6 +13,8 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
@@ -26,7 +28,7 @@ public class pacientes_interfaz extends javax.swing.JFrame {
     /**
      * Creates new form pacientes_interfaz
      */
-    TestDBConnectionPool conE = new TestDBConnectionPool();
+    ConnectionPool conE = new ConnectionPool();
     //Conexion conE = new Conexion();
     Connection conetE;
     DefaultTableModel modelo;
@@ -48,7 +50,7 @@ public class pacientes_interfaz extends javax.swing.JFrame {
         String sqlConsult = pacienteDAO.mostrarPacientesSQL();
         try {
             //conetE = conE.Conectar();
-            conetE = conE.test();
+            conetE = conE.getConnection();
             st = conetE.createStatement();
 
             rs = st.executeQuery(sqlConsult);
@@ -74,9 +76,9 @@ public class pacientes_interfaz extends javax.swing.JFrame {
         }
     }
 
-    public void registrar() {
+    public void registrar() throws SQLException {
         //Connection con1 = new Conexion().Conectar();
-        Connection con1 = new TestDBConnectionPool().test();
+        Connection con1 = new ConnectionPool().getConnection();
         paciente_modelo uno = new paciente_modelo();
         if (this.dni_reg.getText().isBlank()) {
             JOptionPane.showMessageDialog(this, "Uno o mas campos estan vacios. Favor de llenarlos.");
@@ -416,8 +418,12 @@ public class pacientes_interfaz extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton2MouseClicked
 
     private void jButton1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton1MouseClicked
-        // TODO add your handling code here:
-        registrar();
+        try {
+            // TODO add your handling code here:
+            registrar();
+        } catch (SQLException ex) {
+            Logger.getLogger(pacientes_interfaz.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_jButton1MouseClicked
 
     private void botonRegresar_RecepcionistMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_botonRegresar_RecepcionistMouseClicked

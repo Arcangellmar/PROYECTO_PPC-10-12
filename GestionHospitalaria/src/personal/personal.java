@@ -4,7 +4,7 @@
  */
 package personal;
 
-import Conexion.TestDBConnectionPool;
+import Conexion.ConnectionPool;
 import InicioSesion.inicioAdministrativo;
 import com.mysql.jdbc.Blob;
 import com.mysql.jdbc.PreparedStatement;
@@ -40,7 +40,7 @@ public class personal extends javax.swing.JFrame {
     /**
      * Creates new form personal
      */
-    TestDBConnectionPool conE = new TestDBConnectionPool();
+    ConnectionPool conE = new ConnectionPool();
     String path;
     File image; 
     FileInputStream fis; 
@@ -59,7 +59,7 @@ public class personal extends javax.swing.JFrame {
     void mostrarpersonal(){
         String sql ="SELECT * FROM personal p INNER JOIN medico m ON p.id_dni = m.id_dni_personal INNER JOIN turno t ON p.turno = t.codigo_turno INNER JOIN especialidad e ON m.codigo_especialidad = e.codigo_especialidad";
         try{
-            conetE = conE.test();
+            conetE = conE.getConnection();
             st = conetE.createStatement();
             rs = st.executeQuery(sql);
             Object[] especialistas = new Object[8];
@@ -84,8 +84,8 @@ public class personal extends javax.swing.JFrame {
             
         }
     }
-    public void buscar(int dni) {
-        Connection con1 = new TestDBConnectionPool().test();
+    public void buscar(int dni) throws SQLException {
+        Connection con1 = new ConnectionPool().getConnection();
         PreparedStatement pst = null;
         ResultSet rs = null;
         persona uno = new persona(); 
@@ -167,8 +167,8 @@ public class personal extends javax.swing.JFrame {
         this.foto.setText("");
         
     }
-    public void registrar(){
-        Connection con1 = new TestDBConnectionPool().test();
+    public void registrar() throws SQLException{
+        Connection con1 = new ConnectionPool().getConnection();
         persona uno = new persona(); 
         int dni2=Integer.parseInt(this.dni1.getText().trim());
         PreparedStatement pst = null;
@@ -567,14 +567,22 @@ public class personal extends javax.swing.JFrame {
     private void jPanel2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jPanel2MouseClicked
         // TODO add your handling code here:
         int dni = Integer.parseInt(this.dni_buscar.getText().trim()); 
-        buscar(dni);
+        try {
+            buscar(dni);
+        } catch (SQLException ex) {
+            Logger.getLogger(personal.class.getName()).log(Level.SEVERE, null, ex);
+        }
         
     }//GEN-LAST:event_jPanel2MouseClicked
 
     private void dni_buscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dni_buscarActionPerformed
         // TODO add your handling code here:
         int dni = Integer.parseInt(this.dni_buscar.getText().trim()); 
-        buscar(dni);
+        try {
+            buscar(dni);
+        } catch (SQLException ex) {
+            Logger.getLogger(personal.class.getName()).log(Level.SEVERE, null, ex);
+        }
         
     }//GEN-LAST:event_dni_buscarActionPerformed
 
@@ -598,7 +606,11 @@ public class personal extends javax.swing.JFrame {
 //         TODO add your handling code here:
         if(!pnom.getText().isEmpty()&&
                 !am.getText().isEmpty() && !ap.getText().isEmpty() && !dni1.getText().isEmpty() && !telef.getText().isEmpty()&& !this.nac.getText().isEmpty() &&!path.isEmpty()&&this.especialidad.getSelectedIndex()!=0&& sex.getSelectedIndex()!=0){         
-            registrar();
+            try {
+                registrar();
+            } catch (SQLException ex) {
+                Logger.getLogger(personal.class.getName()).log(Level.SEVERE, null, ex);
+            }
          
         }
         else {

@@ -4,7 +4,7 @@
  */
 package Pacientes;
 
-import Conexion.TestDBConnectionPool;
+import Conexion.ConnectionPool;
 import com.mysql.jdbc.Blob;
 import com.mysql.jdbc.PreparedStatement;
 import java.io.IOException;
@@ -25,7 +25,7 @@ import personal.personal;
  */
 public class PacienteAct implements PacienteDAO {
 
-    TestDBConnectionPool cn = new TestDBConnectionPool();
+    ConnectionPool cn = new ConnectionPool();
     Connection cnE;
     DefaultTableModel modeloE;
     Statement ste;
@@ -41,7 +41,7 @@ public class PacienteAct implements PacienteDAO {
         String sql = "SELECT * FROM paciente WHERE id_dni=" + dni;
 
         try {
-            cnE = cn.test();
+            cnE = cn.getConnection();
             ste = cnE.createStatement();
             rse = ste.executeQuery(sql);
 

@@ -22,7 +22,7 @@ public class ConnectionPool {
     private static ConnectionPool instance = null;
     private static Connection connection = null;    
 
-    private ConnectionPool() {
+    public ConnectionPool() {
         try {
             connection = DriverManager.getConnection(URL, USER, PASS);
         } catch (SQLException e) {
