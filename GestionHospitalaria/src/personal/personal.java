@@ -118,7 +118,36 @@ public class personal extends javax.swing.JFrame {
                 Logger.getLogger(personal.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-    }   
+    } 
+    
+    //Funcion eliminar en la base de datos: 
+    
+    public void eliminar(int dni){
+        //Connection con1 = new TestDBConnectionPool().test();
+        Connection con1 = null;
+        PreparedStatement pst = null;
+        
+        persona uno = new persona();
+         if (dni<0|| dni==0) {
+            JOptionPane.showMessageDialog(this, "Uno o mas campos estan vacios. Favor de llenarlos.");
+        } else {
+             try {
+                pst = (PreparedStatement) con1.prepareStatement("DELETE FROM personal p INNER JOIN medico m ON p.id_dni = m.id_dni_personal WHERE id_dni="+dni);
+                int rs = pst.executeUpdate();
+                if (rs>0) {
+                    JOptionPane.showMessageDialog(null, "Persona Eliminada");
+                } else {
+                    JOptionPane.showMessageDialog(this, "NO EXISTE ESTE DNI.");
+                }
+            } catch (SQLException e) {
+                System.err.print(e.toString());
+                JOptionPane.showMessageDialog(this, "Ocurrio un error inesperado.\nFavor comunicarse con el administrador.");
+            } // catch (IOException ex) {
+              //  Logger.getLogger(personal.class.getName()).log(Level.SEVERE, null, ex);
+            //}
+         }
+        
+    }
     public void colocar(persona per) throws SQLException, IOException{
         this.pnom.setText(per.getNombres());
         this.am.setText(per.getAm());
@@ -242,6 +271,8 @@ public class personal extends javax.swing.JFrame {
         foto = new javax.swing.JLabel();
         turno1 = new javax.swing.JComboBox<>();
         botonRegresar_personal = new javax.swing.JButton();
+        jPanel1 = new javax.swing.JPanel();
+        jLabel4 = new javax.swing.JLabel();
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -485,6 +516,40 @@ public class personal extends javax.swing.JFrame {
         });
         background.add(botonRegresar_personal, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 120, 80, 30));
 
+        jPanel1.setBackground(new java.awt.Color(255, 153, 153));
+        jPanel1.setForeground(new java.awt.Color(255, 0, 0));
+        jPanel1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jPanel1MouseClicked(evt);
+            }
+        });
+
+        jLabel4.setText("ELIMINAR");
+        jLabel4.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel4MouseClicked(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap(36, Short.MAX_VALUE)
+                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(22, 22, 22))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel4)
+                .addContainerGap(8, Short.MAX_VALUE))
+        );
+
+        background.add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(580, 180, 120, 30));
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -580,6 +645,17 @@ public class personal extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_botonRegresar_personalActionPerformed
 
+    private void jPanel1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jPanel1MouseClicked
+        // TODO add your handling code here:
+        //AGREGAR accion con la clase eliminar 
+        int dni=Integer.parseInt(this.dni_buscar.getText().trim());
+        eliminar(dni);
+    }//GEN-LAST:event_jPanel1MouseClicked
+
+    private void jLabel4MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel4MouseClicked
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jLabel4MouseClicked
+
     /**
      * @param args the command line arguments
      */
@@ -635,6 +711,8 @@ public class personal extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel5;
