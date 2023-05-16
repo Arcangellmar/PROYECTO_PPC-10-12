@@ -1,5 +1,5 @@
 
-import Configuration.Configuration;
+// import Configuration.Configuration;
 
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
@@ -10,6 +10,7 @@ import Configuration.Configuration;
  *
  * @author alext
  */
+/*
 public class Test {
     
     public static void main(String[] args) {
@@ -18,3 +19,4 @@ public class Test {
         System.out.println(value);
     }
 }
+*/
