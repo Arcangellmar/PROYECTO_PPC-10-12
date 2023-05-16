@@ -17,10 +17,10 @@ import org.apache.commons.dbcp2.BasicDataSource;
  */
 public class ConnectionPool {
 
-    private final String DB = "proyectogh";
-    private final String URL = "jdbc:mysql://0.tcp.sa.ngrok.io:15648/";
-    private final String USER = "root";
-    private final String PASS="Patatas123";
+    private final String DB="proyectogh";
+    private final String URL="jdbc:mysql://localhost:33060/";
+    private final String USER="root";
+    private final String PASS="";
 
     private static ConnectionPool dataSource;
     private BasicDataSource basicDataSource = null;

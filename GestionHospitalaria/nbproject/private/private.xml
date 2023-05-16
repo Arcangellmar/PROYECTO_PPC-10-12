@@ -4,10 +4,12 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/home/ricse/Personal/PROYECTO_PPC-10-12/GestionHospitalaria/src/Conexion/ConnectionPool.java</file>
+            <file>file:/home/ricse/Personal/PROYECTO_PPC-10-12/GestionHospitalaria/src/Pacientes/buscar.java</file>
             <file>file:/home/ricse/Personal/PROYECTO_PPC-10-12/GestionHospitalaria/src/Pacientes/PacienteDAO.java</file>
+            <file>file:/home/ricse/Personal/PROYECTO_PPC-10-12/GestionHospitalaria/src/Pacientes/pacientes_interfaz.java</file>
             <file>file:/home/ricse/Personal/PROYECTO_PPC-10-12/GestionHospitalaria/src/Citas/paciente.java</file>
-            <file>file:/home/ricse/Personal/PROYECTO_PPC-10-12/GestionHospitalaria/src/Pacientes/PacienteFactory.java</file>
             <file>file:/home/ricse/Personal/PROYECTO_PPC-10-12/GestionHospitalaria/src/Pacientes/paciente_modelo.java</file>
+            <file>file:/home/ricse/Personal/PROYECTO_PPC-10-12/GestionHospitalaria/src/Pacientes/PacienteFactory.java</file>
             <file>file:/home/ricse/Personal/PROYECTO_PPC-10-12/GestionHospitalaria/src/Pacientes/PacienteAct.java</file>
         </group>
     </open-files>
