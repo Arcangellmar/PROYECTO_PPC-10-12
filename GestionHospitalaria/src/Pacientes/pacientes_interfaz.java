@@ -5,15 +5,14 @@
  */
 package Pacientes;
 
-import Conexion.ConnectionPool;
+import Conexion.TestDBConnectionPool;
+import StaffMedico.Buscar;
 import InicioSesion.inicioRecepcionista;
 import com.mysql.jdbc.PreparedStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
@@ -24,6 +23,11 @@ import javax.swing.table.TableRowSorter;
  */
 public class pacientes_interfaz extends javax.swing.JFrame {
 
+    /**
+     * Creates new form pacientes_interfaz
+     */
+    TestDBConnectionPool conE = new TestDBConnectionPool();
+    //Conexion conE = new Conexion();
     Connection conetE;
     DefaultTableModel modelo;
     Statement st;
@@ -31,6 +35,7 @@ public class pacientes_interfaz extends javax.swing.JFrame {
     int idE;
     TableRowSorter trsfiltro;
     String filtro;
+    PacienteDAO pacienteDAO = PacienteFactory.methodsDAO();
 
     public pacientes_interfaz() {
         initComponents();
@@ -40,16 +45,16 @@ public class pacientes_interfaz extends javax.swing.JFrame {
     }
 
     void mostrarpacientes() {
-        String sql = "SELECT * from pacientes";
+        String sqlConsult = pacienteDAO.mostrarPacientesSQL();
         try {
             //conetE = conE.Conectar();
-            conetE = ConnectionPool.getInstance().getConnection();
+            conetE = conE.test();
             st = conetE.createStatement();
 
-            rs = st.executeQuery(sql);
+            rs = st.executeQuery(sqlConsult);
 
             Object[] pacientes = new Object[8];
-
+            System.out.println("s");
             modelo = (DefaultTableModel) this.TablaPacientes.getModel();
             while (rs.next()) {
                 pacientes[0] = rs.getString("id_dni");
@@ -69,17 +74,17 @@ public class pacientes_interfaz extends javax.swing.JFrame {
         }
     }
 
-    public void registrar() throws SQLException {
+    public void registrar() {
         //Connection con1 = new Conexion().Conectar();
-        Connection con1 = ConnectionPool.getInstance().getConnection();
+        Connection con1 = new TestDBConnectionPool().test();
         paciente_modelo uno = new paciente_modelo();
         if (this.dni_reg.getText().isBlank()) {
             JOptionPane.showMessageDialog(this, "Uno o mas campos estan vacios. Favor de llenarlos.");
         }
-
-        String sql = "INSERT INTO `paciente`(`id_dni`, `nombres`, `apellido_paterno`, `apellido_materno`, `fecha_nacimiento`, `genero`, `eps`, `telefono`) VALUES (?,?,?,?,?,?,?,?)";
+        String sqlConsult = pacienteDAO.registrarPacientSQL();
+        
         try {
-            PreparedStatement psd = (PreparedStatement) con1.prepareStatement(sql);
+            PreparedStatement psd = (PreparedStatement) con1.prepareStatement(sqlConsult);
             psd.setString(1, this.dni_reg.getText());
             psd.setString(2, this.nomb.getText());
             psd.setString(3, ap.getText());
@@ -103,10 +108,9 @@ public class pacientes_interfaz extends javax.swing.JFrame {
         this.TablaPacientes.setModel(modelo);
     }
 
-    public void buscar(String buscar) {
-        buscar p = new buscar();
+    public void buscar(String dni) {
 
-        DefaultTableModel modelo = p.buscar(buscar);
+        DefaultTableModel modelo = pacienteDAO.buscar(dni);
         TablaPacientes.setModel(modelo);
     }
 
@@ -412,12 +416,8 @@ public class pacientes_interfaz extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton2MouseClicked
 
     private void jButton1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton1MouseClicked
-        try {
-            // TODO add your handling code here:
-            registrar();
-        } catch (SQLException ex) {
-            Logger.getLogger(pacientes_interfaz.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        // TODO add your handling code here:
+        registrar();
     }//GEN-LAST:event_jButton1MouseClicked
 
     private void botonRegresar_RecepcionistMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_botonRegresar_RecepcionistMouseClicked
