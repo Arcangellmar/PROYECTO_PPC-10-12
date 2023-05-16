@@ -5,6 +5,7 @@
  */
 package HistorialClinico;
 
+import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
 /**
@@ -32,7 +33,7 @@ public class DekkerHistorialClinico {
      * @param seccionCritica Sección critica.
      */
     
-    public void comenzar(int id, Historial.SeccionCritica seccionCritica){
+    public void comenzar(int id, Historial.SeccionCritica seccionCritica) throws SQLException{
         //Seccion no critica
         int otro = (id + 1) % 2;
         this.flag.set(id, 1);

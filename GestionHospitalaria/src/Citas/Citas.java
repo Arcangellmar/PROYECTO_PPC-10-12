@@ -5,7 +5,7 @@
  */
 package Citas;
 
-import Conexion.TestDBConnectionPool;
+import Conexion.ConnectionPool;
 import InicioSesion.inicioRecepcionista;
 import com.mysql.jdbc.PreparedStatement;
 import java.io.IOException;
@@ -16,7 +16,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.management.Query;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
@@ -32,10 +31,7 @@ public class Citas extends javax.swing.JFrame {
     /**
      * Creates new form Citas
      */
-    TestDBConnectionPool conE = new TestDBConnectionPool();
-    TestDBConnectionPool conE2 = new TestDBConnectionPool();
-    Connection conetE;
-    Connection conetE2;
+    Connection cn;
     DefaultTableModel modelo;
     ArrayList<registroCitas> registrocitas = new ArrayList<registroCitas>();
     Statement st, st2;
@@ -44,7 +40,6 @@ public class Citas extends javax.swing.JFrame {
     TableRowSorter trsfiltro;
     String filtro;
 
-    
     public Citas() {
         initComponents();
         setLocationRelativeTo(null);
@@ -52,47 +47,46 @@ public class Citas extends javax.swing.JFrame {
         mostrarEspecialidades(cb_especialidades);
         mostrarTurnos(cb_cita_turno);
     }
-    
-    void mostrarcitas(){
-        String sql ="SELECT * FROM `citas` c INNER JOIN turno t ON c.turno=t.codigo_turno INNER JOIN especialidad e ON c.codigo_especialidad=e.codigo_especialidad";
-        try{
-            conetE = conE.test();
-            st = conetE.createStatement();
+
+    void mostrarcitas() {
+        String sql = "SELECT * FROM `citas` c INNER JOIN turno t ON c.turno=t.codigo_turno INNER JOIN especialidad e ON c.codigo_especialidad=e.codigo_especialidad";
+        try {
+            cn = ConnectionPool.getInstance().getConnection();
+            st = cn.createStatement();
             rs = st.executeQuery(sql);
-           
+
             Object[] citas = new Object[7];
-            
+
             modelo = (DefaultTableModel) this.Tabla_Citas.getModel();
-            while(rs.next()){
-                citas [0] = rs.getString("codigo_cita");
-                citas [1] = rs.getString("dni_paciente");
-                citas [2] = rs.getString("nombre_especialidad");
-                citas [3] = rs.getString("fecha");
-                citas [4] = rs.getString("dni_medico");
-                citas [5] = rs.getString("descripcion");
-                citas [6] = rs.getString("nro_orden");
-                
+            while (rs.next()) {
+                citas[0] = rs.getString("codigo_cita");
+                citas[1] = rs.getString("dni_paciente");
+                citas[2] = rs.getString("nombre_especialidad");
+                citas[3] = rs.getString("fecha");
+                citas[4] = rs.getString("dni_medico");
+                citas[5] = rs.getString("descripcion");
+                citas[6] = rs.getString("nro_orden");
+
                 modelo.addRow(citas);
             }
             Tabla_Citas.setModel(modelo);
-        }catch(SQLException e){
-            
+        } catch (SQLException e) {
+
         }
     }
-    
-    public void colocar(registroCitas cit) throws SQLException, IOException{
-        this.tf_paciente_dni.setText(cit.getDNIPaciente()+"");
-        this.tf_medico_dni.setText(cit.getDNIMedico()+"");
-        this.tf_paciente_orden.setText(cit.getNumOrden()+"");
+
+    public void colocar(registroCitas cit) throws SQLException, IOException {
+        this.tf_paciente_dni.setText(cit.getDNIPaciente() + "");
+        this.tf_medico_dni.setText(cit.getDNIMedico() + "");
+        this.tf_paciente_orden.setText(cit.getNumOrden() + "");
 //        this.turno.setSelectedIndex(Integer.parseInt(per.getTurno().trim()));
 //        this.foto.setText(per.getFoto());
         this.cb_especialidades.setSelectedItem(cit.getEspecialidad());
         this.tf_cita_fecha.setText(cit.getFecha());
         this.cb_cita_turno.setSelectedIndex(Integer.parseInt(cit.getTurno().trim()));
-        
-    }   
-    
-    
+
+    }
+
 //    public void registrar(){
 //        Connection con1 = new TestDBConnectionPool().test();
 //        registroCitas uno = new registroCitas();
@@ -124,44 +118,42 @@ public class Citas extends javax.swing.JFrame {
 //                 
 //           }
 //    }
-    
-    
-    public class SeccionCritica{
+    public class SeccionCritica {
+
         Citas cita = new Citas();
         private int atenciones;
-        
-        void registrar(){
-        Connection con1 = new TestDBConnectionPool().test();
-        registroCitas uno = new registroCitas();
-        int atenciones = 0;
-        PreparedStatement pst = null;
-        ResultSet rs = null;
-        
-        //JOptionPane.showMessageDialog(this, "Uno o mas campos estan vacios. Favor de llenarlos.");
-            
-            String sql="INSERT INTO citas(dni_paciente, codigo_especialidad, fecha, dni_medico, turno, nro_orden) VALUES(?, ?, ?, ?, ?, ?)";
+
+        void registrar() throws SQLException {
+            Connection con1 = ConnectionPool.getInstance().getConnection();
+            registroCitas uno = new registroCitas();
+            int atenciones = 0;
+            PreparedStatement pst = null;
+            ResultSet rs = null;
+
+            //JOptionPane.showMessageDialog(this, "Uno o mas campos estan vacios. Favor de llenarlos.");
+            String sql = "INSERT INTO citas(dni_paciente, codigo_especialidad, fecha, dni_medico, turno, nro_orden) VALUES(?, ?, ?, ?, ?, ?)";
             try {
-                PreparedStatement psd=(PreparedStatement) con1.prepareStatement(sql);
+                PreparedStatement psd = (PreparedStatement) con1.prepareStatement(sql);
                 psd.setString(1, tf_paciente_dni.getText());
-                psd.setInt(2, cb_especialidades.getSelectedIndex()+1);
+                psd.setInt(2, cb_especialidades.getSelectedIndex() + 1);
                 psd.setString(3, tf_cita_fecha.getText());
                 psd.setString(4, tf_medico_dni.getText());
-                psd.setInt(5, cb_cita_turno.getSelectedIndex()+1);
+                psd.setInt(5, cb_cita_turno.getSelectedIndex() + 1);
                 psd.setString(6, tf_paciente_orden.getText());
-            
-            int n=psd.executeUpdate();
-            if(n>0){
-                //JOptionPane.showMessageDialog(null, "Registro Guardado");
-                System.out.println("Registro Guardado");
-                atenciones = atenciones + 1;
-            }
+
+                int n = psd.executeUpdate();
+                if (n > 0) {
+                    //JOptionPane.showMessageDialog(null, "Registro Guardado");
+                    System.out.println("Registro Guardado");
+                    atenciones = atenciones + 1;
+                }
             } catch (SQLException e) {
                 System.err.print(e.toString());
                 //JOptionPane.showMessageDialog(this.cita, "Ocurrio un error inesperado.\nFavor comunicarse con el administrador.");
                 System.out.println("Ocurrio un error inesperado.\nFavor comunicarse con el administrador");
-           }
+            }
         }
-        
+
         public int getSuma() {
             return atenciones;
         }
@@ -419,7 +411,7 @@ public class Citas extends javax.swing.JFrame {
     }//GEN-LAST:event_tf_buscar_paciente_dniActionPerformed
 
     private void btn_actualizarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_actualizarActionPerformed
-        
+
     }//GEN-LAST:event_btn_actualizarActionPerformed
 
     private void tf_medico_dniActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tf_medico_dniActionPerformed
@@ -443,29 +435,28 @@ public class Citas extends javax.swing.JFrame {
 
     private void bbuscar2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bbuscar2ActionPerformed
         int dniPaciente = Integer.parseInt(this.tf_buscar_paciente_dni.getText());
-        String sql = "SELECT paciente.id_dni FROM paciente WHERE id_dni = "+dniPaciente;
-                
+        String sql = "SELECT paciente.id_dni FROM paciente WHERE id_dni = " + dniPaciente;
+
         try {
-            Statement stDNIP = conetE.createStatement();
+            Statement stDNIP = cn.createStatement();
             ResultSet rsPDNI = stDNIP.executeQuery(sql);
             System.out.println(sql);
-            
-            if(rsPDNI.next()){
-                
+
+            if (rsPDNI.next()) {
+
                 paciente p = new paciente(rsPDNI.getInt("id_dni"));
-                tf_paciente_dni.setText(p.getDniPaciente()+"");
+                tf_paciente_dni.setText(p.getDniPaciente() + "");
                 tf_buscar_paciente_dni.setText("");
-            }else{
-                
-                JOptionPane.showMessageDialog(null,"Paciente con DNI "+tf_buscar_paciente_dni.getText()+" no existe");
+            } else {
+
+                JOptionPane.showMessageDialog(null, "Paciente con DNI " + tf_buscar_paciente_dni.getText() + " no existe");
             }
         } catch (SQLException ex) {
             Logger.getLogger(Citas.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_bbuscar2ActionPerformed
-    
 
-    
+
     private void btn_limpiarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_limpiarActionPerformed
         tf_paciente_dni.setText("");
         tf_buscar_paciente_dni.setText("");
@@ -478,7 +469,7 @@ public class Citas extends javax.swing.JFrame {
     }//GEN-LAST:event_cb_especialidadesActionPerformed
 
     private void btn_registrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_registrarActionPerformed
-        
+
     }//GEN-LAST:event_btn_registrarActionPerformed
 
     private void tf_paciente_dniActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tf_paciente_dniActionPerformed
@@ -487,31 +478,38 @@ public class Citas extends javax.swing.JFrame {
 
     private void btn_registrarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btn_registrarMouseClicked
         // TODO add your handling code here:
-        
-        if(!tf_paciente_dni.getText().isEmpty() && !tf_cita_fecha.getText().isEmpty()
-                && !tf_medico_dni.getText().isEmpty()&& !tf_paciente_orden.getText().isEmpty()){         
-            
-                
+
+        if (!tf_paciente_dni.getText().isEmpty() && !tf_cita_fecha.getText().isEmpty()
+                && !tf_medico_dni.getText().isEmpty() && !tf_paciente_orden.getText().isEmpty()) {
+
             Dekker dekker = new Dekker();
             SeccionCritica seccionCriticaDekker = new SeccionCritica();
 
-             //Hilos aplicando exclución mutua con el algoritmo de Dekker.
+            //Hilos aplicando exclución mutua con el algoritmo de Dekker.
             Thread hilo1 = new Thread(new Runnable() {
                 @Override
-                public void run() {  
-                    dekker.comenzar(0, seccionCriticaDekker);
+                public void run() {
+                    try {
+                        dekker.comenzar(0, seccionCriticaDekker);
+                    } catch (SQLException ex) {
+                        Logger.getLogger(Citas.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
             });
             hilo1.start();
             this.dispose();
             Thread hilo2 = new Thread(new Runnable() {
-                
+
                 @Override
                 public void run() {
-                    
+
                     new Citas().setVisible(true);
-                    
-                    dekker.comenzar(1, seccionCriticaDekker);
+
+                    try {
+                        dekker.comenzar(1, seccionCriticaDekker);
+                    } catch (SQLException ex) {
+                        Logger.getLogger(Citas.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
             });
             hilo2.start();
@@ -520,13 +518,12 @@ public class Citas extends javax.swing.JFrame {
                 hilo1.join();
                 hilo2.join();
             } catch (InterruptedException ex) {
-                        Logger.getLogger(Citas.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(Citas.class.getName()).log(Level.SEVERE, null, ex);
             }
 
             System.out.println(" Pacientes atendidos "
-                            + "iteraciones por cada hilo: " + 2);
-        }
-        else {
+                    + "iteraciones por cada hilo: " + 2);
+        } else {
             JOptionPane.showMessageDialog(null, "DEBE LLENAR TODOS LOS CAMPOS. ");
         }
     }//GEN-LAST:event_btn_registrarMouseClicked
@@ -535,7 +532,7 @@ public class Citas extends javax.swing.JFrame {
      * @param args the command line arguments
      */
     public static void main(String args[]) {
-        
+
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
@@ -563,11 +560,11 @@ public class Citas extends javax.swing.JFrame {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 new Citas().setVisible(true);
-            
+
             }
         });
     }
- 
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTable Tabla_Citas;
     private javax.swing.JButton bbuscar2;
@@ -610,19 +607,19 @@ public class Citas extends javax.swing.JFrame {
         e.setModel(comboe);
         cargarEspecialidades cE = new cargarEspecialidades();
         String seleccionEsp;
-        try{
-            
-            Statement ste = conetE.createStatement();
-            ResultSet rsE = ste.executeQuery("SELECT especialidad.nombre_especialidad, especialidad.codigo_especialidad, medico.id_dni_personal FROM medico\n" +
-                                             "INNER JOIN especialidad ON especialidad.codigo_especialidad = medico.codigo_especialidad");
-            
-            while(rsE.next()){ 
+        try {
+
+            Statement ste = cn.createStatement();
+            ResultSet rsE = ste.executeQuery("SELECT especialidad.nombre_especialidad, especialidad.codigo_especialidad, medico.id_dni_personal FROM medico\n"
+                    + "INNER JOIN especialidad ON especialidad.codigo_especialidad = medico.codigo_especialidad");
+
+            while (rsE.next()) {
                 especialidades esp = new especialidades();
                 esp.setEspecialidades(rsE.getString("especialidad.nombre_especialidad"));
                 cE.agregarEspecialidades(esp);
                 comboe.addElement(esp.getEspecialidades());
                 System.out.println("Especialidades cargadas correctamente");
-                
+
             }
             /*if(Citas.cb_especialidades.getItemCount() > 0){
                 seleccionEsp = Citas.cb_especialidades.getSelectedItem().toString();
@@ -631,8 +628,8 @@ public class Citas extends javax.swing.JFrame {
                              "WHERE especialidad.nombre_especialidad = '"+seleccionEsp+"'";
                 System.out.println(sql);
             }*/
-        }catch(SQLException x){
-            System.out.println("Error al mostrar combobox Turnos"+x);
+        } catch (SQLException x) {
+            System.out.println("Error al mostrar combobox Turnos" + x);
         }
     }
 
@@ -640,19 +637,19 @@ public class Citas extends javax.swing.JFrame {
         DefaultComboBoxModel combot = new DefaultComboBoxModel();
         t.setModel(combot);
         cargarTurno cT = new cargarTurno();
-        
-        try{
-            Statement stt = conetE.createStatement();
+
+        try {
+            Statement stt = cn.createStatement();
             ResultSet rsT = stt.executeQuery("SELECT descripcion FROM turno;");
-            while(rsT.next()){
+            while (rsT.next()) {
                 turno trn = new turno();
                 trn.setTurno(rsT.getString(1));
                 cT.agregarTurno(trn);
                 combot.addElement(trn.getTurno());
                 System.out.println("Turno cargados correctamente");
             }
-        }catch(SQLException e){
-            System.out.println("Error al mostrar combobox Turnos"+e);
+        } catch (SQLException e) {
+            System.out.println("Error al mostrar combobox Turnos" + e);
         }
     }
 

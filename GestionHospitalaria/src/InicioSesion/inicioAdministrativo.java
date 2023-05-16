@@ -3,13 +3,9 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package InicioSesion;
+
 import personal.personal;
 import Asistencia.Asistencia;
-import Conexion.TestDBConnectionPool;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import proyectoppc.Home;
 
 /**
@@ -23,7 +19,7 @@ public class inicioAdministrativo extends javax.swing.JFrame {
      */
     public inicioAdministrativo() {
         initComponents();
-    }                                          
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -126,15 +122,15 @@ public class inicioAdministrativo extends javax.swing.JFrame {
     private void asistenciaLabelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_asistenciaLabelMouseClicked
         // TODO add your handling code here:
         this.dispose();
-            new Asistencia().setVisible(true);
+        new Asistencia().setVisible(true);
     }//GEN-LAST:event_asistenciaLabelMouseClicked
 
     private void salirLabelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_salirLabelMouseClicked
         // TODO add your handling code here:
-         this.dispose();
+        this.dispose();
         new Home().setVisible(true);
         System.out.println("Cerrando Sesión");
-        
+
     }//GEN-LAST:event_salirLabelMouseClicked
 
     /**

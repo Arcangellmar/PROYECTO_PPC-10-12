@@ -1,7 +1,8 @@
 package Asistencia;
 
 import java.sql.CallableStatement;
-import Conexion.TestDBConnectionPool;
+//import Conexion.TestDBConnectionPool;
+import Conexion.ConnectionPool;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -9,17 +10,16 @@ import java.sql.Statement;
 import javax.swing.table.DefaultTableModel;
 
 public class BuscarAsistencia {
-    //Conexion cn = new Conexion();
-    TestDBConnectionPool cn = new TestDBConnectionPool();
+
     Connection cnE;
     DefaultTableModel modeloE;
     Statement ste;
     ResultSet rse;
     int idE;
-    
-    public DefaultTableModel buscarAsistencias(String buscar){
-        String [] nombreColumna = {"NOMBRES", "APELLIDO PATERNO", "APELLIDO MATERNO", "DNI", "ESPECIALIDAD", "TURNO", "HORA ENTRADA", "HORA LLEGADA", "TARDANZA"};
-        Object [] asistenciasSearch = new Object[9];
+
+    public DefaultTableModel buscarAsistencias(String buscar) {
+        String[] nombreColumna = {"NOMBRES", "APELLIDO PATERNO", "APELLIDO MATERNO", "DNI", "ESPECIALIDAD", "TURNO", "HORA ENTRADA", "HORA LLEGADA", "TARDANZA"};
+        Object[] asistenciasSearch = new Object[9];
         DefaultTableModel modelo = new DefaultTableModel(null, nombreColumna);
 
         //YA NO SE USA QUERY
@@ -52,10 +52,10 @@ public class BuscarAsistencia {
                 asistenciasSearch[6] = rse.getTime("hora_entrada");
                 asistenciasSearch[7] = rse.getTime("hora");
                 asistenciasSearch[8] = rse.getTime("timediff(lector_asistencia.hora, hora_entrada)");
-                
+
                 modelo.addRow(asistenciasSearch);
             }
-            
+
 //            System.out.println("asistenciasSearch[0]: "+asistenciasSearch[0]);
 //            System.out.println("asistenciasSearch[1]: "+asistenciasSearch[1]);
 //            System.out.println("asistenciasSearch[2]: "+asistenciasSearch[2]);
@@ -65,11 +65,10 @@ public class BuscarAsistencia {
 //            System.out.println("asistenciasSearch[6]: "+asistenciasSearch[6]);
 //            System.out.println("asistenciasSearch[7]: "+asistenciasSearch[7]);
 //            System.out.println("asistenciasSearch[8]: "+asistenciasSearch[8]);
-           
-        }catch(Exception e){
+        } catch (SQLException e) {
             System.out.println(e);
         }
-        
+
         return modelo;
     }
 }

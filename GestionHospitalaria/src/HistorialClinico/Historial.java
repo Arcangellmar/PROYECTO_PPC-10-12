@@ -5,22 +5,14 @@
  */
 package HistorialClinico;
 
-import Conexion.TestDBConnectionPool;
-import Conexion.TestDBConnectionPool;
+import Conexion.ConnectionPool;
 import InicioSesion.inicioRecepcionista;
 import com.mysql.jdbc.PreparedStatement;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseEvent;
 import java.sql.*;
 import javax.swing.JOptionPane;
-import javax.swing.RowFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
-import java.rmi.Remote;
-import java.rmi.server.UnicastRemoteObject;
 import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,7 +21,7 @@ import java.util.logging.Logger;
  * @author Julian
  */
 public class Historial extends javax.swing.JFrame {
-    TestDBConnectionPool conE = new TestDBConnectionPool();
+
     Connection conetE;
     DefaultTableModel modelo = new DefaultTableModel();
     Statement st;
@@ -37,6 +29,7 @@ public class Historial extends javax.swing.JFrame {
     int idE;
     private TableRowSorter trsfiltro;
     String filtro;
+
     /**
      * Creates new form Historial
      */
@@ -45,51 +38,52 @@ public class Historial extends javax.swing.JFrame {
         setLocationRelativeTo(null);
         metodoListarHistorial();
     }
-    
+
     private void metodoListarHistorial() {
         String sql = "SELECT id_historial, cod_medico, dni_paciente, fecha_redaccion, codigo_especialidad, tipo_sangre, peso, talla, presion, observaciones FROM historial_clinico";
-        
-        try{
-            conetE = conE.test();
+
+        try {
+            conetE = ConnectionPool.getInstance().getConnection();
             st = conetE.createStatement();
             rs = st.executeQuery(sql);
             Object[] historial = new Object[10];
             modelo = (DefaultTableModel) TablaHistorial.getModel();
-            
-            while(rs.next()){
-                historial [0] = rs.getInt("id_historial");
-                historial [1] = rs.getInt("cod_medico");
-                historial [2] = rs.getInt("dni_paciente");
-                historial [3] = rs.getString("fecha_redaccion");
-                historial [4] = rs.getInt("codigo_especialidad");
-                historial [5] = rs.getString("tipo_sangre");
-                historial [6] = rs.getFloat("peso");
-                historial [7] = rs.getFloat("talla");
-                historial [8] = rs.getFloat("presion");
-                historial [9] = rs.getString("observaciones");
-                
+
+            while (rs.next()) {
+                historial[0] = rs.getInt("id_historial");
+                historial[1] = rs.getInt("cod_medico");
+                historial[2] = rs.getInt("dni_paciente");
+                historial[3] = rs.getString("fecha_redaccion");
+                historial[4] = rs.getInt("codigo_especialidad");
+                historial[5] = rs.getString("tipo_sangre");
+                historial[6] = rs.getFloat("peso");
+                historial[7] = rs.getFloat("talla");
+                historial[8] = rs.getFloat("presion");
+                historial[9] = rs.getString("observaciones");
+
                 modelo.addRow(historial);
             }
             TablaHistorial.setModel(modelo);
-        }catch(SQLException e){
+        } catch (SQLException e) {
             System.out.println(e);
         }
     }
-    
-    public class SeccionCritica{
+
+    public class SeccionCritica {
+
         Historial historial = new Historial();
         private int hist;
-        
-        void registrar(){
-            Connection conH = new TestDBConnectionPool().test();
+
+        void registrar() throws SQLException {
+            Connection conH = ConnectionPool.getInstance().getConnection();
             registroHistorial uno = new registroHistorial();
             int hist = 0;
             PreparedStatement pst = null;
             ResultSet rs = null;
-            
+
             String sql = "INSERT INTO historial_clinico(cod_medico, dni_paciente, codigo_especialidad, tipo_sangre, peso, talla, presion, observaciones) VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
-            
-            try{
+
+            try {
                 PreparedStatement psd = (PreparedStatement) conH.prepareStatement(sql);
                 psd.setInt(1, Integer.parseInt(HC_cod_medico.getText()));
                 psd.setInt(2, Integer.parseInt(HC_paciente_dni.getText()));
@@ -99,19 +93,19 @@ public class Historial extends javax.swing.JFrame {
                 psd.setFloat(6, Float.parseFloat(HC_talla.getText()));
                 psd.setFloat(7, Float.parseFloat(HC_presion.getText()));
                 psd.setString(8, HC_observaciones.getText());
-                
+
                 int n = psd.executeUpdate();
-                
-                if(n > 0){
+
+                if (n > 0) {
                     metodoListarHistorial();
                     System.out.println("Registro Guardado");
                     hist = hist + 1;
                 }
-            }catch(SQLException e){
+            } catch (SQLException e) {
                 System.err.print(e.toString());
                 //JOptionPane.showMessageDialog(this.cita, "Ocurrio un error inesperado.\nFavor comunicarse con el administrador.");
                 System.out.println("Ocurrio un error inesperado.\nFavor comunicarse con el administrador");
-           }
+            }
         }
     }
 
@@ -527,13 +521,13 @@ public class Historial extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_TF_HistorialKeyTyped
 
-    public void buscar(String buscar) throws RemoteException{
+    public void buscar(String buscar) throws RemoteException {
         Buscar p = new Buscar();
-        
+
         DefaultTableModel modelo = p.Historial(buscar);
         TablaHistorial.setModel(modelo);
-    } 
-    
+    }
+
     private void btn_buscarHistorialActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_buscarHistorialActionPerformed
         try {
             // TODO add your handling code here:
@@ -613,30 +607,38 @@ public class Historial extends javax.swing.JFrame {
 
     private void btn_registrar_hcMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btn_registrar_hcMouseClicked
         // TODO add your handling code here:
-        if(!HC_paciente_dni.getText().isEmpty() && !HC_cod_medico.getText().isEmpty()
-                && !HC_sangre.getText().isEmpty()&& !HC_peso.getText().isEmpty()
-                 && !HC_talla.getText().isEmpty()&& !HC_presion.getText().isEmpty()
-                 && !HC_cod_especialidad.getText().isEmpty()&& !HC_observaciones.getText().isEmpty()){
+        if (!HC_paciente_dni.getText().isEmpty() && !HC_cod_medico.getText().isEmpty()
+                && !HC_sangre.getText().isEmpty() && !HC_peso.getText().isEmpty()
+                && !HC_talla.getText().isEmpty() && !HC_presion.getText().isEmpty()
+                && !HC_cod_especialidad.getText().isEmpty() && !HC_observaciones.getText().isEmpty()) {
             DekkerHistorialClinico dekker = new DekkerHistorialClinico();
             SeccionCritica seccionCriticaDekker = new SeccionCritica();
-            
+
             //Hilos aplicando exclución mutua con el algoritmo de Dekker.
             Thread hilo1 = new Thread(new Runnable() {
                 @Override
-                public void run() {  
-                    dekker.comenzar(0, seccionCriticaDekker);
+                public void run() {
+                    try {
+                        dekker.comenzar(0, seccionCriticaDekker);
+                    } catch (SQLException ex) {
+                        Logger.getLogger(Historial.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
             });
             hilo1.start();
             this.dispose();
             Thread hilo2 = new Thread(new Runnable() {
-                
+
                 @Override
                 public void run() {
-                    
-                    new Historial().setVisible(true);
-                    
-                    dekker.comenzar(1, seccionCriticaDekker);
+
+                    try {
+                        new Historial().setVisible(true);
+                        
+                        dekker.comenzar(1, seccionCriticaDekker);
+                    } catch (SQLException ex) {
+                        Logger.getLogger(Historial.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
             });
             hilo2.start();
@@ -645,12 +647,12 @@ public class Historial extends javax.swing.JFrame {
                 hilo1.join();
                 hilo2.join();
             } catch (InterruptedException ex) {
-                        Logger.getLogger(Historial.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(Historial.class.getName()).log(Level.SEVERE, null, ex);
             }
 
             System.out.println(" Pacientes atendidos "
-                            + "iteraciones por cada hilo: " + 2);
-        }else{
+                    + "iteraciones por cada hilo: " + 2);
+        } else {
             JOptionPane.showMessageDialog(null, "DEBE LLENAR TODOS LOS CAMPOS. ");
         }
     }//GEN-LAST:event_btn_registrar_hcMouseClicked
@@ -669,13 +671,13 @@ public class Historial extends javax.swing.JFrame {
         HC_talla.setText("");
         HC_presion.setText("");
         HC_observaciones.setText("");
-                
+
     }//GEN-LAST:event_btn_limpiar_hcActionPerformed
 
-    private void LimpiarTabla(){
+    private void LimpiarTabla() {
         TablaHistorial.setModel(new DefaultTableModel());
     }
-    
+
     /**
      * @param args the command line arguments
      */

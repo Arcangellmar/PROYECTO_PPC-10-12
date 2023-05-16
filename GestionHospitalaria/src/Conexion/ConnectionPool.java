@@ -4,12 +4,10 @@
  */
 package Conexion;
 
+import Configuration.Configuration;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.apache.commons.dbcp2.BasicDataSource;
 
 /**
  *
@@ -17,44 +15,36 @@ import org.apache.commons.dbcp2.BasicDataSource;
  */
 public class ConnectionPool {
 
-    private final String DB="proyectogh";
-    private final String URL="jdbc:mysql://localhost:3306/";
-    private final String USER="root";
-    private final String PASS="Patatas123";
-    
-    private static ConnectionPool dataSource;
-    private BasicDataSource basicDataSource=null;
-    
-    public ConnectionPool(){
-     
-        basicDataSource = new BasicDataSource();
-        basicDataSource.setDriverClassName("com.mysql.jdbc.Driver");
-        basicDataSource.setUsername(USER);
-        basicDataSource.setPassword(PASS);
-        basicDataSource.setUrl(URL);
-        
-        basicDataSource.setMinIdle(5);
-        basicDataSource.setMaxIdle(20);
-        basicDataSource.setMaxTotal(50);
-        basicDataSource.setMaxWaitMillis(-1);
-        
-    }
-    
-    public static ConnectionPool getInstance() {
-        if (dataSource == null) {
-            dataSource = new ConnectionPool();
-            return dataSource;
-        } else {
-            return dataSource;
+    private final String URL = Configuration.LoadConfig("URL");
+    private final String USER = Configuration.LoadConfig("USER");
+    private final String PASS = Configuration.LoadConfig("PASS"); 
+
+    private static ConnectionPool instance = null;
+    private static Connection connection = null;    
+
+    private ConnectionPool() {
+        try {
+            connection = DriverManager.getConnection(URL, USER, PASS);
+        } catch (SQLException e) {
+            System.err.println("Error al conectar: " + e.getMessage());
         }
     }
 
-    public Connection getConnection() throws SQLException{
-      return this.basicDataSource.getConnection();
+    public static ConnectionPool getInstance() {
+        if (instance == null) {
+            instance = new ConnectionPool();
+            return instance;
+        } else {
+            return instance;
+        }
     }
-    
+
+    public Connection getConnection() throws SQLException {
+        return connection;
+    }
+
     public void closeConnection(Connection connection) throws SQLException {
         connection.close();
     }
-    
+
 }

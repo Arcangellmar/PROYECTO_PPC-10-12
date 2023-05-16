@@ -1,21 +1,11 @@
 package StaffMedico;
 
-import Conexion.TestDBConnectionPool;
-import Conexion.TestDBConnectionPool;
+import Conexion.ConnectionPool;
 import InicioSesion.inicioRecepcionista;
-import com.mysql.jdbc.PreparedStatement;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseEvent;
 import java.sql.*;
-import javax.swing.JOptionPane;
-import javax.swing.RowFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
-import java.rmi.Remote;
-import java.rmi.server.UnicastRemoteObject;
 import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,9 +13,8 @@ import java.util.logging.Logger;
  *
  * @author Jeanpiere Palacios Barrutia
  */
-public class Especialistas extends javax.swing.JFrame{
-    
-    TestDBConnectionPool conE = new TestDBConnectionPool();
+public class Especialistas extends javax.swing.JFrame {
+
     Connection conetE;
     DefaultTableModel modelo;
     Statement st;
@@ -33,47 +22,47 @@ public class Especialistas extends javax.swing.JFrame{
     int idE;
     private TableRowSorter trsfiltro;
     String filtro;
-    
+
     public Especialistas() throws RemoteException {
         initComponents();
         setLocationRelativeTo(null);
         metodoListarEspecialistas();
     }
-    
-    public void metodoListarEspecialistas() throws RemoteException{
-        String sql ="SELECT medico.id_dni_personal, personal.apellido_paterno, personal.apellido_materno, personal.nombres, especialidad.nombre_especialidad, personal.fecha_nacimiento, turno.descripcion, COUNT(citas.dni_medico) AS 'CONSULTAS' FROM medico\n" +
-        "INNER JOIN personal ON personal.id_dni = medico.id_dni_personal\n" +
-        "INNER JOIN especialidad ON medico.codigo_especialidad = especialidad.codigo_especialidad\n" +
-        "INNER JOIN turno ON personal.turno = turno.codigo_turno\n" +
-        "INNER JOIN citas ON medico.id_dni_personal = citas.dni_medico AND citas.dni_medico = personal.id_dni\n" +
-        "GROUP BY id_dni_personal";
-        
-        try{
-            conetE = conE.test();
+
+    public void metodoListarEspecialistas() throws RemoteException {
+        String sql = "SELECT medico.id_dni_personal, personal.apellido_paterno, personal.apellido_materno, personal.nombres, especialidad.nombre_especialidad, personal.fecha_nacimiento, turno.descripcion, COUNT(citas.dni_medico) AS 'CONSULTAS' FROM medico\n"
+                + "INNER JOIN personal ON personal.id_dni = medico.id_dni_personal\n"
+                + "INNER JOIN especialidad ON medico.codigo_especialidad = especialidad.codigo_especialidad\n"
+                + "INNER JOIN turno ON personal.turno = turno.codigo_turno\n"
+                + "INNER JOIN citas ON medico.id_dni_personal = citas.dni_medico AND citas.dni_medico = personal.id_dni\n"
+                + "GROUP BY id_dni_personal";
+
+        try {
+            conetE = ConnectionPool.getInstance().getConnection();
             st = conetE.createStatement();
             rs = st.executeQuery(sql);
             Object[] especialistas = new Object[8];
             modelo = (DefaultTableModel) TableEspecialidad.getModel();
-            
-            while(rs.next()){
-                especialistas [0] = rs.getInt("id_dni_personal");
-                especialistas [1] = rs.getString("apellido_paterno");
-                especialistas [2] = rs.getString("apellido_materno");
-                especialistas [3] = rs.getString("nombres");
-                especialistas [4] = rs.getString("nombre_especialidad");
-                especialistas [5] = rs.getString("fecha_nacimiento");
-                especialistas [6] = rs.getString("descripcion");
-                especialistas [7] = rs.getInt("CONSULTAS");
-                
+
+            while (rs.next()) {
+                especialistas[0] = rs.getInt("id_dni_personal");
+                especialistas[1] = rs.getString("apellido_paterno");
+                especialistas[2] = rs.getString("apellido_materno");
+                especialistas[3] = rs.getString("nombres");
+                especialistas[4] = rs.getString("nombre_especialidad");
+                especialistas[5] = rs.getString("fecha_nacimiento");
+                especialistas[6] = rs.getString("descripcion");
+                especialistas[7] = rs.getInt("CONSULTAS");
+
                 modelo.addRow(especialistas);
             }
             TableEspecialidad.setModel(modelo);
-        }catch(Exception e){
-            
+        } catch (Exception e) {
+
         }
     }
-    
-    public void buscarEspecialista(String buscar){
+
+    public void buscarEspecialista(String buscar) {
         TableEspecialidad.setModel(modelo);
     }
 
@@ -207,7 +196,7 @@ public class Especialistas extends javax.swing.JFrame{
 
     private void botonRegresar_EspecialistasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonRegresar_EspecialistasActionPerformed
         // TODO add your handling code here:
-        
+
     }//GEN-LAST:event_botonRegresar_EspecialistasActionPerformed
 
     private void TxtFieldEspecialistaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TxtFieldEspecialistaActionPerformed
@@ -218,13 +207,13 @@ public class Especialistas extends javax.swing.JFrame{
         // TODO add your handling code here:
     }//GEN-LAST:event_dniBuscadorTxtField_Especialistas2ActionPerformed
 
-    public void buscar(String buscar) throws RemoteException{
+    public void buscar(String buscar) throws RemoteException {
         Buscar p = new Buscar();
         System.out.println("Estableciendo comunicación con el método");
         DefaultTableModel modelo = p.Especialistas(buscar);
         TableEspecialidad.setModel(modelo);
-    }   
-    
+    }
+
     private void btn_buscarEspecialistaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_buscarEspecialistaActionPerformed
         try {
             // TODO add your handling code here:

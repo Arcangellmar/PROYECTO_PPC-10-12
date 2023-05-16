@@ -4,7 +4,7 @@
  */
 package personal;
 
-import Conexion.TestDBConnectionPool;
+import Conexion.ConnectionPool;
 import InicioSesion.inicioAdministrativo;
 import com.mysql.jdbc.Blob;
 import com.mysql.jdbc.PreparedStatement;
@@ -15,7 +15,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import static java.lang.constant.ConstantDescs.NULL;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -30,20 +29,15 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
 
-
 /**
  *
  * @author Lisett y Valeria
  */
 public class personal extends javax.swing.JFrame {
 
-    /**
-     * Creates new form personal
-     */
-    TestDBConnectionPool conE = new TestDBConnectionPool();
     String path;
-    File image; 
-    FileInputStream fis; 
+    File image;
+    FileInputStream fis;
     Connection conetE;
     DefaultTableModel modelo;
     Statement st;
@@ -51,50 +45,53 @@ public class personal extends javax.swing.JFrame {
     int idE;
     TableRowSorter trsfiltro;
     String filtro;
+
     public personal() {
         initComponents();
-         setLocationRelativeTo(null);
+        setLocationRelativeTo(null);
         mostrarpersonal();
     }
-    void mostrarpersonal(){
-        String sql ="SELECT * FROM personal p INNER JOIN medico m ON p.id_dni = m.id_dni_personal INNER JOIN turno t ON p.turno = t.codigo_turno INNER JOIN especialidad e ON m.codigo_especialidad = e.codigo_especialidad";
-        try{
-            conetE = conE.test();
+
+    void mostrarpersonal() {
+        String sql = "SELECT * FROM personal p INNER JOIN medico m ON p.id_dni = m.id_dni_personal INNER JOIN turno t ON p.turno = t.codigo_turno INNER JOIN especialidad e ON m.codigo_especialidad = e.codigo_especialidad";
+        try {
+            conetE = ConnectionPool.getInstance().getConnection();
             st = conetE.createStatement();
             rs = st.executeQuery(sql);
             Object[] especialistas = new Object[8];
             modelo = (DefaultTableModel) this.TablaPersonal.getModel();
-            
-            while(rs.next()){
+
+            while (rs.next()) {
                 System.out.println("HOLA");
-                especialistas [0] = rs.getString("nombres");
-              
-                especialistas [1] = rs.getString("apellido_paterno");
-                especialistas [2] = rs.getString("apellido_materno");
-                especialistas [3] = rs.getString("nombre_especialidad");
-                especialistas [4] = rs.getString("descripcion");
-                especialistas [5] = rs.getString("genero");
-                especialistas [6] = rs.getString("fecha_nacimiento");
-                especialistas [7] = rs.getString("telefono");
-                
+                especialistas[0] = rs.getString("nombres");
+
+                especialistas[1] = rs.getString("apellido_paterno");
+                especialistas[2] = rs.getString("apellido_materno");
+                especialistas[3] = rs.getString("nombre_especialidad");
+                especialistas[4] = rs.getString("descripcion");
+                especialistas[5] = rs.getString("genero");
+                especialistas[6] = rs.getString("fecha_nacimiento");
+                especialistas[7] = rs.getString("telefono");
+
                 modelo.addRow(especialistas);
             }
             TablaPersonal.setModel(modelo);
-        }catch(Exception e){
-            
+        } catch (Exception e) {
+
         }
     }
-    public void buscar(int dni) {
-        Connection con1 = new TestDBConnectionPool().test();
+
+    public void buscar(int dni) throws SQLException {
+        Connection con1 = ConnectionPool.getInstance().getConnection();
         PreparedStatement pst = null;
         ResultSet rs = null;
-        persona uno = new persona(); 
-        
-        if (dni<0|| dni==0) {
+        persona uno = new persona();
+
+        if (dni < 0 || dni == 0) {
             JOptionPane.showMessageDialog(this, "Uno o mas campos estan vacios. Favor de llenarlos.");
         } else {
             try {
-                pst = (PreparedStatement) con1.prepareStatement("SELECT * FROM personal p INNER JOIN medico m ON p.id_dni = m.id_dni_personal INNER JOIN turno t ON p.turno = t.codigo_turno INNER JOIN especialidad e ON m.codigo_especialidad = e.codigo_especialidad WHERE id_dni="+dni);
+                pst = (PreparedStatement) con1.prepareStatement("SELECT * FROM personal p INNER JOIN medico m ON p.id_dni = m.id_dni_personal INNER JOIN turno t ON p.turno = t.codigo_turno INNER JOIN especialidad e ON m.codigo_especialidad = e.codigo_especialidad WHERE id_dni=" + dni);
                 rs = pst.executeQuery();
                 if (rs.next()) {
                     uno.setFoto((Blob) rs.getBlob("foto"));
@@ -107,7 +104,7 @@ public class personal extends javax.swing.JFrame {
                     uno.setEspecialidad(rs.getString("nombre_especialidad"));
                     uno.setTelef(rs.getInt("telefono"));
                     uno.setSexo(rs.getString("genero"));
-                    colocar(uno); 
+                    colocar(uno);
                 } else {
                     JOptionPane.showMessageDialog(this, "NO EXISTE ESTE DNI.");
                 }
@@ -118,83 +115,86 @@ public class personal extends javax.swing.JFrame {
                 Logger.getLogger(personal.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-    }   
-    public void colocar(persona per) throws SQLException, IOException{
+    }
+
+    public void colocar(persona per) throws SQLException, IOException {
         this.pnom.setText(per.getNombres());
         this.am.setText(per.getAm());
         this.ap.setText(per.getAp());
 //        this.turno.setSelectedIndex(Integer.parseInt(per.getTurno().trim()));
 //        this.foto.setText(per.getFoto());
-        this.dni1.setText(per.getDni()+"");
-        this.telef.setText(per.getTelef()+"");
-        this.nac.setText(per.getNacim()+"");
+        this.dni1.setText(per.getDni() + "");
+        this.telef.setText(per.getTelef() + "");
+        this.nac.setText(per.getNacim() + "");
         this.sex.setSelectedItem(per.getSexo());
         this.especialidad.setSelectedItem(per.getEspecialidad());
         this.especialidad.setSelectedIndex(Integer.parseInt(per.getTurno().trim()));
-        InputStream in = per.getFoto().getBinaryStream();  
+        InputStream in = per.getFoto().getBinaryStream();
         BufferedImage imagen = ImageIO.read(in);
         Image image = imagen.getScaledInstance(80, 100, Image.SCALE_DEFAULT);
         this.foto.setIcon((new ImageIcon(image)));
         this.foto.setText("");
-        
+
     }
-    public void registrar(){
-        Connection con1 = new TestDBConnectionPool().test();
-        persona uno = new persona(); 
-        int dni2=Integer.parseInt(this.dni1.getText().trim());
+
+    public void registrar() throws SQLException {
+        Connection con1 = ConnectionPool.getInstance().getConnection();
+        persona uno = new persona();
+        int dni2 = Integer.parseInt(this.dni1.getText().trim());
         PreparedStatement pst = null;
         ResultSet rs = null;
         //JOptionPane.showMessageDialog(this, "Uno o mas campos estan vacios. Favor de llenarlos.");
-            String sql1= "INSERT INTO usuario(usuario, contrasenia) VALUES (?,?)";
-            try{
-                PreparedStatement psd=(PreparedStatement) con1.prepareStatement(sql1);
- 
-                psd.setString(1, dni1.getText().trim());
-                psd.setString(2, dni1.getText().trim());
-               // psd.setString(3, "NULL");
-            int n=psd.executeUpdate();
-            if(n>0){
+        String sql1 = "INSERT INTO usuario(usuario, contrasenia) VALUES (?,?)";
+        try {
+            PreparedStatement psd = (PreparedStatement) con1.prepareStatement(sql1);
+
+            psd.setString(1, dni1.getText().trim());
+            psd.setString(2, dni1.getText().trim());
+            // psd.setString(3, "NULL");
+            int n = psd.executeUpdate();
+            if (n > 0) {
                 JOptionPane.showMessageDialog(null, "registroguardado");
             }
-            }catch(SQLException e) {
-                System.err.print(e.toString());
-                JOptionPane.showMessageDialog(this, "Ocurrio un error inesperado.\nFavor comunicarse con el administrador.");
+        } catch (SQLException e) {
+            System.err.print(e.toString());
+            JOptionPane.showMessageDialog(this, "Ocurrio un error inesperado.\nFavor comunicarse con el administrador.");
+        }
+        try {
+            pst = (PreparedStatement) con1.prepareStatement("SELECT id_usuario FROM usuario where usuario=" + dni2);
+            rs = pst.executeQuery();
+            if (rs.next()) {
+                uno.setId(Integer.parseInt(rs.getString("id_usuario")));
+            } else {
+                JOptionPane.showMessageDialog(this, "NO EXISTE ESTE DNI.");
             }
-            try {
-                pst = (PreparedStatement) con1.prepareStatement("SELECT id_usuario FROM usuario where usuario="+dni2);
-                rs = pst.executeQuery();
-                if (rs.next()) {
-                    uno.setId(Integer.parseInt(rs.getString("id_usuario"))); 
-                } else {
-                    JOptionPane.showMessageDialog(this, "NO EXISTE ESTE DNI.");
-                }
-            } catch (SQLException e) {
-                System.err.print(e.toString());
-                JOptionPane.showMessageDialog(this, "Ocurrio un error inesperado.\nFavor comunicarse con el administrador.");
-            }
-            String sql="INSERT INTO personal (nombres,apellido_paterno,apellido_materno,turno,id_dni,telefono,fecha_nacimiento,genero, foto,id_usuario) VALUES (?,?,?,?,?,?,?,?,?,?)";
-            try {
-                PreparedStatement psd=(PreparedStatement) con1.prepareStatement(sql);
-                psd.setString(1, pnom.getText());
-                psd.setString(2, ap.getText());
-                psd.setString(3, am.getText());
-                psd.setInt(4, especialidad.getSelectedIndex());
-                psd.setString(5, dni1.getText());
-                psd.setString(6, telef.getText());
-                psd.setString(7, nac.getText());
-                psd.setString(8, sex.getSelectedItem().toString());
-                psd.setBinaryStream(9, fis, (int) image.length());
-                psd.setString(10,uno.getId()+"");
-            
-            int n=psd.executeUpdate();
-            if(n>0){
+        } catch (SQLException e) {
+            System.err.print(e.toString());
+            JOptionPane.showMessageDialog(this, "Ocurrio un error inesperado.\nFavor comunicarse con el administrador.");
+        }
+        String sql = "INSERT INTO personal (nombres,apellido_paterno,apellido_materno,turno,id_dni,telefono,fecha_nacimiento,genero, foto,id_usuario) VALUES (?,?,?,?,?,?,?,?,?,?)";
+        try {
+            PreparedStatement psd = (PreparedStatement) con1.prepareStatement(sql);
+            psd.setString(1, pnom.getText());
+            psd.setString(2, ap.getText());
+            psd.setString(3, am.getText());
+            psd.setInt(4, especialidad.getSelectedIndex());
+            psd.setString(5, dni1.getText());
+            psd.setString(6, telef.getText());
+            psd.setString(7, nac.getText());
+            psd.setString(8, sex.getSelectedItem().toString());
+            psd.setBinaryStream(9, fis, (int) image.length());
+            psd.setString(10, uno.getId() + "");
+
+            int n = psd.executeUpdate();
+            if (n > 0) {
                 JOptionPane.showMessageDialog(null, "Registro Guardado");
             }
-            } catch (SQLException e) {
-                System.err.print(e.toString());
-                JOptionPane.showMessageDialog(this, "Ocurrio un error inesperado.\nFavor comunicarse con el administrador.");
-            }
+        } catch (SQLException e) {
+            System.err.print(e.toString());
+            JOptionPane.showMessageDialog(this, "Ocurrio un error inesperado.\nFavor comunicarse con el administrador.");
+        }
     }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -500,17 +500,25 @@ public class personal extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jPanel2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jPanel2MouseClicked
-        // TODO add your handling code here:
-        int dni = Integer.parseInt(this.dni_buscar.getText().trim()); 
-        buscar(dni);
-        
+        try {
+            // TODO add your handling code here:
+            int dni = Integer.parseInt(this.dni_buscar.getText().trim());
+            buscar(dni);
+        } catch (SQLException ex) {
+            Logger.getLogger(personal.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
     }//GEN-LAST:event_jPanel2MouseClicked
 
     private void dni_buscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dni_buscarActionPerformed
-        // TODO add your handling code here:
-        int dni = Integer.parseInt(this.dni_buscar.getText().trim()); 
-        buscar(dni);
-        
+        try {
+            // TODO add your handling code here:
+            int dni = Integer.parseInt(this.dni_buscar.getText().trim());
+            buscar(dni);
+        } catch (SQLException ex) {
+            Logger.getLogger(personal.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
     }//GEN-LAST:event_dni_buscarActionPerformed
 
     private void jPanel3MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jPanel3MouseClicked
@@ -531,12 +539,15 @@ public class personal extends javax.swing.JFrame {
 
     private void jPanel5MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jPanel5MouseClicked
 //         TODO add your handling code here:
-        if(!pnom.getText().isEmpty()&&
-                !am.getText().isEmpty() && !ap.getText().isEmpty() && !dni1.getText().isEmpty() && !telef.getText().isEmpty()&& !this.nac.getText().isEmpty() &&!path.isEmpty()&&this.especialidad.getSelectedIndex()!=0&& sex.getSelectedIndex()!=0){         
-            registrar();
-         
-        }
-        else {
+        if (!pnom.getText().isEmpty()
+                && !am.getText().isEmpty() && !ap.getText().isEmpty() && !dni1.getText().isEmpty() && !telef.getText().isEmpty() && !this.nac.getText().isEmpty() && !path.isEmpty() && this.especialidad.getSelectedIndex() != 0 && sex.getSelectedIndex() != 0) {
+            try {
+                registrar();
+            } catch (SQLException ex) {
+                Logger.getLogger(personal.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+        } else {
             JOptionPane.showMessageDialog(null, "DEBE LLENAR TODOS LOS CAMPOS. ");
         }
     }//GEN-LAST:event_jPanel5MouseClicked
@@ -544,28 +555,28 @@ public class personal extends javax.swing.JFrame {
     private void fotoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_fotoMouseClicked
         // TODO add your handling code here:
         JFileChooser fileChooser = new JFileChooser();
-        
-    fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-    
-    FileNameExtensionFilter imgFilter = new FileNameExtensionFilter("JPG & GIF Images", "jpg", "gif"); 
-    fileChooser.setFileFilter(imgFilter);
 
-    int result = fileChooser.showOpenDialog(this);
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 
-    if (result != JFileChooser.CANCEL_OPTION) {
+        FileNameExtensionFilter imgFilter = new FileNameExtensionFilter("JPG & GIF Images", "jpg", "gif");
+        fileChooser.setFileFilter(imgFilter);
 
-        File fileName = fileChooser.getSelectedFile();
+        int result = fileChooser.showOpenDialog(this);
 
-        if ((fileName == null) || (fileName.getName().equals(""))) {
-            System.out.println("");
-        } else {
-            path = fileName.getAbsolutePath();
+        if (result != JFileChooser.CANCEL_OPTION) {
+
+            File fileName = fileChooser.getSelectedFile();
+
+            if ((fileName == null) || (fileName.getName().equals(""))) {
+                System.out.println("");
+            } else {
+                path = fileName.getAbsolutePath();
+            }
         }
-    }
-    
-    image = new File(path);
+
+        image = new File(path);
         try {
-             fis = new FileInputStream (image);
+            fis = new FileInputStream(image);
         } catch (FileNotFoundException ex) {
             Logger.getLogger(personal.class.getName()).log(Level.SEVERE, null, ex);
         }
