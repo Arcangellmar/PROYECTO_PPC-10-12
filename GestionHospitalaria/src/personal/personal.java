@@ -56,33 +56,39 @@ public class personal extends javax.swing.JFrame {
          setLocationRelativeTo(null);
         mostrarpersonal();
     }
+    // EXTRACT METHOT
     void mostrarpersonal(){
-        String sql ="SELECT * FROM personal p INNER JOIN medico m ON p.id_dni = m.id_dni_personal INNER JOIN turno t ON p.turno = t.codigo_turno INNER JOIN especialidad e ON m.codigo_especialidad = e.codigo_especialidad";
-        try{
-            conetE = conE.getConnection();
-            st = conetE.createStatement();
-            rs = st.executeQuery(sql);
-            Object[] especialistas = new Object[8];
-            modelo = (DefaultTableModel) this.TablaPersonal.getModel();
-            
-            while(rs.next()){
-                System.out.println("HOLA");
-                especialistas [0] = rs.getString("nombres");
-              
-                especialistas [1] = rs.getString("apellido_paterno");
-                especialistas [2] = rs.getString("apellido_materno");
-                especialistas [3] = rs.getString("nombre_especialidad");
-                especialistas [4] = rs.getString("descripcion");
-                especialistas [5] = rs.getString("genero");
-                especialistas [6] = rs.getString("fecha_nacimiento");
-                especialistas [7] = rs.getString("telefono");
-                
-                modelo.addRow(especialistas);
-            }
-            TablaPersonal.setModel(modelo);
-        }catch(Exception e){
-            
-        }
+//        String sql ="SELECT * FROM personal p INNER JOIN medico m ON p.id_dni = m.id_dni_personal INNER JOIN turno t ON p.turno = t.codigo_turno INNER JOIN especialidad e ON m.codigo_especialidad = e.codigo_especialidad";
+//        try{
+//            conetE = conE.getConnection();
+//            st = conetE.createStatement();
+//            rs = st.executeQuery(sql);
+//            Object[] especialistas = new Object[8];
+//            modelo = (DefaultTableModel) this.TablaPersonal.getModel();
+//            
+//            while(rs.next()){
+//                System.out.println("HOLA");
+//                especialistas [0] = rs.getString("nombres");
+//              
+//                especialistas [1] = rs.getString("apellido_paterno");
+//                especialistas [2] = rs.getString("apellido_materno");
+//                especialistas [3] = rs.getString("nombre_especialidad");
+//                especialistas [4] = rs.getString("descripcion");
+//                especialistas [5] = rs.getString("genero");
+//                especialistas [6] = rs.getString("fecha_nacimiento");
+//                especialistas [7] = rs.getString("telefono");
+//                
+//                modelo.addRow(especialistas);
+//            }
+//            TablaPersonal.setModel(modelo);
+//        }catch(Exception e){
+//            
+//        }
+
+        modelo = (DefaultTableModel) this.TablaPersonal.getModel();
+        
+        var model = PersonalController.GetPersonal(modelo);
+        TablaPersonal.setModel(model);
     }
     public void buscar(int dni) throws SQLException {
         Connection con1 = new ConnectionPool().getConnection();
