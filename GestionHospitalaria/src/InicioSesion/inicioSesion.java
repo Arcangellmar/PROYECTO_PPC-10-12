@@ -27,52 +27,32 @@ public class inicioSesion extends javax.swing.JFrame {
     }
 
     public void ingresar() throws SQLException {
-        Connection con1 = ConnectionPool.getInstance().getConnection();
-        //Connection con1 = new Conexion().Conectar();
-        //Connection con1 = new ConnectionPool().Conectar();
-        PreparedStatement pst = null;
-        ResultSet rs = null;
+        
         String User = userTxtf.getText();
         String Pass = contraTxt.getText();
-        if (User.equals("") || Pass.equals("")) {
+        int result = LoginController.Login(User, Pass);
+        
+        if (result == 1){
             JOptionPane.showMessageDialog(this, "Uno o mas campos estan vacios. Favor de llenarlos.");
-        } else {
-            try {
-                //pst = (PreparedStatement) con1.prepareStatement("select usuario, contrasenia from usuario where usuario='" + User
-                //        + "' and contrasenia ='" + Pass + "'");
-                pst = (PreparedStatement) con1.prepareStatement("SELECT usuario.usuario, usuario.contrasenia, rol.nombre_rol FROM usuario "
-                        + "INNER JOIN usuario_rol ON usuario_rol.id_usuario=usuario.id_usuario "
-                        + "INNER JOIN rol ON rol.id_rol=usuario_rol.id_rol where usuario.usuario='" + User
-                        + "' and usuario.contrasenia ='" + Pass + "'");
-                rs = pst.executeQuery();
-
-                if (rs.next()) {
-
-                    String u = rs.getString("usuario.usuario");
-                    String p = rs.getString("usuario.contrasenia");
-                    String rol = rs.getString("rol.nombre_rol");
-                    if (rol.equals("Recepcionista")) {
-                        this.dispose();
-                        new inicioRecepcionista().setVisible(true);
-                    } else {
-                        if (rol.equals("Medico")) {
-                            this.dispose();
-                            new inicioMedico().setVisible(true);
-                        } else {
-                            this.dispose();
-                            new inicioAdministrativo().setVisible(true);
-                        }
-                    }
-
-                } else {
-
-                    JOptionPane.showMessageDialog(this, "Credenciales incorrectas. Vuelve a intentar de nuevo.");
-                }
-            } catch (SQLException e) {
-                System.err.print(e.toString());
-                JOptionPane.showMessageDialog(this, "Ocurrio un error inesperado.\nFavor comunicarse con el administrador.");
-            }
         }
+        if (result == 2){
+            JOptionPane.showMessageDialog(this, "Ocurrio un error inesperado.\nFavor comunicarse con el administrador.");
+        }
+        if (result == 3){
+            JOptionPane.showMessageDialog(this, "Credenciales incorrectas. Vuelve a intentar de nuevo.");
+        }
+        if (result == 4){
+            this.dispose();
+            new inicioRecepcionista().setVisible(true);
+        }
+        if (result == 5){
+            this.dispose();
+            new inicioMedico().setVisible(true);
+        }
+        if (result == 6){
+            this.dispose();
+            new inicioAdministrativo().setVisible(true);
+        }        
     }
 
     private void userTxtfKeyTyped(java.awt.event.KeyEvent evt) {
